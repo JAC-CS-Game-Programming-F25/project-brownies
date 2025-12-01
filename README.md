@@ -4,71 +4,206 @@
 -   [ ] Replace the sample proposal below with the one for your game idea.
 -   [ ] Get the proposal greenlit by Vik.
 -   [ ] Place any assets in `assets/` and remember to update `src/config.json`.
--   [ ] Decide on a height and width inside `src/globals.js`. The height and width will most likely be determined based on the size of the assets you find.
--   [ ] Start building the individual components of your game, constantly referring to the proposal you wrote to keep yourself on track.
+-   [ ] Decide on a height and width inside `src/globals.js`.
+-   [ ] Start building the individual components of your game.
 -   [ ] Good luck, you got this!
 
 ---
 
-# Sample Proposal - Pokémon the Trading Card Game
-
-> [!note]
-> This was taken from a project I did in university so the scope is **much** larger than what I'm expecting from you in terms of number of features!
+# Star Defenders – Proposal
 
 ## ✒️ Description
 
-In this turn-based battle card game, players assume the role of a Pokémon trainer and use their Pokémon to battle their opponent's Pokémon. Players play Pokémon to the field and attack their opponent's Pokémon. A Pokémon that has sustained enough damage is Knocked Out, and the player who knocked it out draws a Prize card. There are usually six Prize cards, and the primary win condition is to draw all of them. Other ways to win are by knocking out all the Pokémon the opponent has on the field so that the opponent has none left, or if at the beginning of their opponent's turn there are no cards left to draw in the opponent's deck.
+Star Defenders is a 2D arcade-style space shooter inspired by Galaga. The player controls a spaceship at the bottom of the screen and must destroy waves of alien enemies. Enemies enter using curved paths, then lock into a formation grid managed by a `FormationController`. Individual enemies can break formation and dive toward the player.
+
+Each enemy type is its own class (`BeeEnemy`, `ButterflyEnemy`, `BossEnemy`), all created through an `EnemyFactory`. The game includes collisions, shooting, enemy AI, player lives, scoring, wave progression, and several state machines powering core systems.
+
+This project demonstrates state machines, OOP, factory pattern, hitboxes, animations, tweens, sound integration, and persistent high scores.
+
+---
 
 ## 🕹️ Gameplay
 
-Players begin by having one player select heads or tails, and the other flips a coin; the winner of the coin flip will decide who goes first or second. The player going first cannot attack their first turn, unless the card says otherwise. (Dice may be used in place of coins, with even numbers representing heads and odd numbers representing tails). Players then shuffle their decks and draw seven cards, then play one Basic Pokémon onto the field. This Pokémon is known as the Active Pokémon and is usually the one that attacks and receives damage. If a player does not have any Basic Pokémon, they must shuffle and draw a new hand, and the opponent may draw one additional card. Once both players have at least one Basic Pokémon, they can play up to five more Basic Pokémon onto their "Bench" (representing the maximum-carry limit of six from the video games). Players then take the top six cards of their deck and place them to the side as Prize Cards. Play then begins with the player who won the coin flip.
+- Player moves left/right at the bottom of the screen.
+- Player fires bullets upward at alien enemies.
+- Enemies fly into the screen on paths, then take preset formation positions.
+- FormationController manages spacing, layout, and timed dive attacks.
+- Enemies shoot bullets or dive at the player.
+- Player loses a life on collision and respawns with temporary invincibility.
+- Player clears waves by eliminating all enemies.
+- Game ends when all player lives are lost.
 
-Play alternates between players who may take several actions during their turn, including playing new Basic Pokémon, evolving their Pokémon, playing Trainer cards and Energy cards, and using Pokémon Abilities. A player may also retreat their Active Pokémon, switching the Active Pokémon with one on the Bench. At the end of their turn, a player may use one of their Active Pokémon's attacks, provided the prerequisite amount and types of Energy are attached to that Pokémon. Effects from that attack are then activated and damage may be placed on the Defending Pokémon; some attacks simply have effects but do not do damage. Damage may be modified depending on whether the defender has a weakness or a resistance to the attacker's Pokémon type. If the final damage exceeds the defending Pokémon's HP, it is Knocked Out, and the active player takes a prize card and ends their turn.
+Keyboard-only control scheme (movement + shooting).
 
-This implementation of _Pokémon the Trading Card Game_ is a single player experience with an AI. The game is played primarily with the mouse to interact with the cards and general GUI. The players can optionally hit `M` on their keyboard to mute all game sounds.
+---
 
 ## 📃 Requirements
 
-> [!note]
-> This was a web project so that's why you'll see requirements about logging in and uploading data which for you is irrelevant. Focus more on the requirements describing actions taken for gameplay.
+1. Player horizontal movement.
+2. Player shooting.
+3. Player collision detection + life system.
+4. Player respawn behavior.
+5. Enemy entry movement paths.
+6. Enemies lock into formation positions.
+7. Dive attacks from individual enemies.
+8. Bullet <-> Enemy collision detection.
+9. Enemy <-> Player collision.
+10. Score system and UI.
+11. Player lives UI.
+12. Wave progression system.
+13. High score persistence.
+14. Shoot/explosion sounds.
+15. Sprite rendering.
+16. Explosion animations.
+17. Tweened enemy entry movement.
+18. Player state machine.
+19. Enemy state machine.
+20. Bullet state machine.
+21. FormationController state machine.
 
-1. The user shall register to be able to login.
-2. The user shall login to be able to play a game.
-3. The user shall upload a valid deck file.
-4. The user shall upload a valid cards file.
-5. The user shall upload a valid abilities file.
-6. The user shall select which deck they will use in the game.
-7. The user shall select which deck the AI will use in the game.
-8. The system shall "flip a coin" to decide which player goes first.
-9. The system shall shuffle the user's deck.
-10. The system shall draw the top 7 cards from the user's deck.
-11. If the user does not have a Basic Pokémon in their hand the system shall "mulligan" until they do.
-12. Upon each mulligan, the AI shall draw a card.
-13. The user shall put one of their Basic Pokémon face down as their Active Pokémon.
-14. The user shall put up to 5 more Basic Pokémon face down on their Bench.
-15. Upon a new turn, the system shall draw a card from the deck of the current player.
-16. Upon a new turn, the system shall place the drawn card in the hand of the current player.
-17. The user shall put (up to 5 total) Basic Pokémon cards from their hand onto their Bench.
-18. The user shall Evolve their Pokémon as many times as they choose.
-19. The user shall attach an Energy card from their hand to one of their Pokémon once per turn.
-20. The user shall play Trainer cards (as many as they want, but only one Supporter card and one Stadium card per turn).
-21. The user shall Retreat their Active Pokémon once per turn.
-22. The user shall use as many Abilities as they choose.
-23. The user shall attack the opponent's Active Pokémon.
-24. After a player attacks, the system shall end their turn and start their opponent's turn.
-25. The system shall execute any "special conditions" after a turn is over.
-26. The user shall pick a Victory Card when the opposing Active Pokémon dies.
+---
 
-### 🤖 State Diagram
+# 🤖 State Diagrams
 
-> [!note]
-> Remember that you'll need diagrams for not only game states but entity states as well.
+## Global Game State Machine
 
-![State Diagram](./assets/images/StateDiagram.png)
+```mermaid
+stateDiagram-v2
+    [*] --> menu
+    menu --> playing : start
+    playing --> paused : pause
+    paused --> playing : resume
+    playing --> game_over : lives depleted
+    game_over --> menu : restart
+```
+
+## Player State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> idle
+    idle --> moving : left/right input
+    moving --> idle : stop input
+    idle --> shooting : fire pressed
+    moving --> shooting : fire pressed
+    shooting --> idle : shot fired
+    idle --> hit : collision
+    moving --> hit : collision
+    shooting --> hit : collision
+    hit --> respawning : lose life
+    respawning --> idle : invincibility ends
+    hit --> dead : lives == 0
+    dead --> [*]
+```
+
+## Enemy State Machine (Each Individual Enemy)
+
+```mermaid
+stateDiagram-v2
+    [*] --> entering
+    entering --> inFormation : entry finished
+    inFormation --> attacking : dive triggered
+    attacking --> inFormation : return to formation
+    inFormation --> exploding : hit by bullet
+    attacking --> exploding : hit by bullet
+    exploding --> [*]
+
+```
+
+## FormationController State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> assembling
+    assembling --> holding : enemies aligned
+    holding --> diving : dive triggered
+    diving --> holding : dive ends
+    holding --> clearing : all enemies defeated
+    clearing --> [*]
+
+```
+
+## Bullet State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> active
+    active --> hittingTarget : collision
+    active --> offscreen : out of bounds
+    hittingTarget --> destroyed
+    offscreen --> destroyed
+    destroyed --> [*]
+
+```
 
 ### 🗺️ Class Diagram
 
-![Class Diagram](./assets/images/ClassDiagram.png)
+```mermaid
+classDiagram
+
+    class GameEntity {
+        +float x
+        +float y
+        +sprite
+        +update(dt)
+        +render()
+    }
+
+    class Player {
+        +int lives
+        +float speed
+        +shoot()
+    }
+
+    class Bullet {
+        +float velocity
+        +bool fromPlayer
+    }
+
+    class Enemy {
+        +string currentState
+        +enterPath()
+        +attack()
+        +explode()
+        +setState(stateName)
+    }
+
+    class BeeEnemy {
+        +uniqueBehavior()
+    }
+
+    class ButterflyEnemy {
+        +uniqueBehavior()
+    }
+
+    class BossEnemy {
+        +uniqueBehavior()
+    }
+
+    class EnemyFactory {
+        +createEnemy(typeName, x, y)
+        +createWave(level)
+    }
+
+    class FormationController {
+        -list~Enemy~ enemies
+        +addEnemy(enemy)
+        +updateFormation(dt)
+        +triggerDive(enemy)
+        +isWaveCleared()
+    }
+
+    GameEntity <|-- Player
+    GameEntity <|-- Bullet
+    GameEntity <|-- Enemy
+
+    Enemy <|-- BeeEnemy
+    Enemy <|-- ButterflyEnemy
+    Enemy <|-- BossEnemy
+
+    FormationController --> Enemy : manages
+    EnemyFactory --> Enemy : creates
+```
 
 ### 🧵 Wireframes
 
