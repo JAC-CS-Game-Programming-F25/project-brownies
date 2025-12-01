@@ -33,7 +33,7 @@ This project demonstrates state machines, OOP, factory pattern, hitboxes, animat
 - Player clears waves by eliminating all enemies.
 - Game ends when all player lives are lost.
 
-Keyboard-only control scheme (movement + shooting).
+Keyboard only control scheme (movement + shooting).
 
 ---
 
@@ -207,46 +207,83 @@ classDiagram
 
 ### 🧵 Wireframes
 
-> [!note]
-> Your wireframes don't have to be super polished. They can even be black/white and hand drawn. I'm just looking for a rough idea about what you're visualizing.
+## Main Menu
 
-![Main Menu](./assets/images/Main-Menu.png)
+![Main Menu](./assets/images/mainMenu.jpg)
 
--   _Let's Play_ will navigate to the main game.
--   _Upload Cards_ will navigation to the forms for uploading and parsing the data files for the game.
--   _Change Log_ will navigate the user to a page with a list of features/changes that have been implemented throughout the development of the game.
+A retro arcade style main menu with the game title at the top and three pixel-style buttons (“Start Game”, “High Score”, “Quit”). The layout resembles a Galaga-era title screen with minimal UI and a dotted retro border.
 
-![Game Board](./assets/images/Game-Board.png)
+## Game Play
+![Game Play](./assets/images/gamePlay.jpg)
 
-We want to keep the GUI as simple and clear as possible by having cards with relevant images to act as a way for the user to intuitively navigate the game. We want to implement a layout that would look like as if one were playing a match of the Pokémon Trading Card Game with physical cards in real life. Clicking on any of the cards will reveal that card's details to the player.
+A retro pixel art gameplay mockup showing the player ship at the bottom, a block of enemies in formation in the center, with a border reminiscent of arcade cabinets. Score and Lives are displayed at the top in pixel text.
+
+## Pause Menu
+![Pause Menu](./assets/images/pauseScreen.jpg)
+
+A centered retro pause overlay with a “PAUSED” title and two large pixel buttons: “Resume” and “Exit”. The rest of the gameplay screen is dimmed to show the game is halted.
+
+## Wave Complete Screen
+![Wave Complete Screen](./assets/images/waveComplete.jpg)
+
+A centered retro pause overlay with a “PAUSED” title and two large pixel buttons: “Resume” and “Exit”. The rest of the gameplay screen is dimmed to show the game is halted.
+
+## Game Over Screen
+![Game Over Screen](./assets/images/gameOver.jpg)
+
+A classic arcade-style “GAME OVER” screen with the final score displayed beneath it. A pixel-style “Return to Menu” button is centered at the bottom.
+
 
 ### 🎨 Assets
 
-We used [app.diagrams.net](https://app.diagrams.net/) to create the wireframes. Wireframes are the equivalent to the skeleton of a web app since they are used to describe the functionality of the product and the users experience.
+We used a pixel-art inspired workflow to create the wireframes for Star Defenders.
 
-We plan on following trends already found in other trading card video games, such as Pokémon Trading Card Game Online, Hearthstone, Magic the Gathering Arena, and Gwent.
+For visual direction, we are following trends already established in classic arcade shooters such as Galaga, Space Invaders, and other retro cabinet games that use bold colors, simple shapes, and clear silhouettes. These games rely on instantly recognizable enemy patterns, readable projectiles, and straightforward UI placement all elements we plan to follow.
 
-The GUI will be kept simple and playful, as to make sure the game is easy to understand what each component does and is, as well as light hearted to keep to the Pokémon theme.
+The overall GUI will remain clean and retro-themed, focusing on clarity over complexity. The goal is to make the game readable at all times: the player should instantly understand where the ship is, where the enemies are, and how many lives or points they have left. The visual design will lean into a nostalgic arcade feel, keeping the experience simple, fun, and authentic to the classic shooter style.
 
 #### 🖼️ Images
 
--   Most images will be used from the well known community driven wikipedia site, [Bulbapedia](https://bulbapedia.bulbagarden.net/wiki/Main_Page).
--   Especially their [Trading Card Game section](<https://bulbapedia.bulbagarden.net/wiki/Full_Art_card_(TCG)>).
+Images will be pixel-art style for retro authenticity.
+
+Possible sources:
+* spriters-resource.com -> free sprite sheets
+* Itch.io -> free pixel-art packs
+* Custom modified assets created in Aseprite or similar tools
+
+Images will be mapped through src/config.json.
 
 #### ✏️ Fonts
 
-For fonts, a simple sans-serif like Roboto will look quite nice. It's a font that is legible, light on storage size, and fun to keep with the theme we're going for. We also used a more cartoonish Pokemon font for the title screen.
+The game will use retro-inspired fonts for both readability and visual style.
 
--   [Pokemon](https://www.dafont.com/pokemon.font)
--   [Roboto](https://fonts.google.com/specimen/Roboto)
+Planned fonts:
+* Press Start 2P —> arcade retro title font
+* Roboto Mono —> clean HUD/UI text
+
+Both fonts fit the classic shooter theme.
 
 #### 🔊 Sounds
+Planned sound effects:
+* laser.wav –> player shooting
+* enemy_explosion.wav –> enemy destroyed
+* player_hit.wav –> player damage
+* enemy_dive.wav –> dive attack SFX
+* start.wav –> wave start jingle
+* bgm_loop.mp3 –> looping background music
 
-All sounds were taken from [freesound.org](https://freesound.org) for the actions pertaining to cards.
+Sound files will be stored in /assets/sounds/.
 
--   [Shuffle cards](https://freesound.org/people/VKProduktion/sounds/217502/)
--   [Flip card](https://freesound.org/people/Splashdust/sounds/84322/)
+Sound sources may include:
+
+https://freesound.org/
+
+https://opengameart.org/
 
 ### 📚 References
 
--   [Pokemon Rulebook](http://assets.pokemon.com/assets/cms2/pdf/trading-card-game/rulebook/xy8-rulebook-en.pdf)
+* Namco’s Galaga for formation design and movement inspiration
+* Retro shooter assets from OpenGameArt
+* Pixel art references from Itch.io
+* Sound effects from Freesound.org
+* MermaidJS documentation for state and class diagrams
