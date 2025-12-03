@@ -1,12 +1,12 @@
 # Final Project
 
--   [ ] Read the [project requirements](https://vikramsinghmtl.github.io/420-5P6-Game-Programming/project/requirements).
--   [ ] Replace the sample proposal below with the one for your game idea.
--   [ ] Get the proposal greenlit by Vik.
--   [ ] Place any assets in `assets/` and remember to update `src/config.json`.
--   [ ] Decide on a height and width inside `src/globals.js`.
--   [ ] Start building the individual components of your game.
--   [ ] Good luck, you got this!
+- [ ] Read the [project requirements](https://vikramsinghmtl.github.io/420-5P6-Game-Programming/project/requirements).
+- [ ] Replace the sample proposal below with the one for your game idea.
+- [ ] Get the proposal greenlit by Vik.
+- [ ] Place any assets in `assets/` and update `src/config.json`.
+- [ ] Choose a height/width in `src/globals.js`.
+- [ ] Start building your components following this proposal.
+- [ ] Good luck, you got this!
 
 ---
 
@@ -14,58 +14,61 @@
 
 ## ✒️ Description
 
-Star Defenders is a 2D arcade-style space shooter inspired by Galaga. The player controls a spaceship at the bottom of the screen and must destroy waves of alien enemies. Enemies enter using curved paths, then lock into a formation grid managed by a `FormationController`. Individual enemies can break formation and dive toward the player.
+Star Defenders is a retro-inspired arcade space shooter where the player pilots a starfighter against waves of alien invaders. Enemies appear in organized formations, break away to launch dive attacks, and pressure the player with coordinated movement. The goal is to survive each wave, earn points, collect powerups, and eventually clear all waves to achieve victory.
 
-Each enemy type is its own class (`BeeEnemy`, `ButterflyEnemy`, `BossEnemy`), all created through an `EnemyFactory`. The game includes collisions, shooting, enemy AI, player lives, scoring, wave progression, and several state machines powering core systems.
-
-This project demonstrates state machines, OOP, factory pattern, hitboxes, animations, tweens, sound integration, and persistent high scores.
+The experience is fast paced and easy to understand: move left, dodge threats, shoot enemies, collect upgrades, and stay alive. The game embraces a classic arcade feel bright visuals, simple controls, escalating challenge making it enjoyable for both casual and experienced players.
 
 ---
 
-## 🕹️ Gameplay
+# 🕹️ Gameplay
 
-- Player moves left/right at the bottom of the screen.
-- Player fires bullets upward at alien enemies.
-- Enemies fly into the screen on paths, then take preset formation positions.
-- FormationController manages spacing, layout, and timed dive attacks.
-- Enemies shoot bullets or dive at the player.
-- Player loses a life on collision and respawns with temporary invincibility.
-- Player clears waves by eliminating all enemies.
-- Game ends when all player lives are lost.
+- The player moves left and right at the bottom of the screen.
+- Enemies fly onto the screen along paths and settle into formation.
+- Individual enemies dive toward the player to attack.
+- The player shoots incoming enemies to score points.
+- Powerups appear and provide temporary upgrades such as rapid fire or shields.
+- The player loses lives when hit and respawns with brief invincibility.
+- Clearing all waves results in victory; losing all lives ends the game.
 
-Keyboard only control scheme (movement + shooting).
+Gameplay is simple, readable, and resembles classic arcade cabinet shooters.
 
 ---
 
-## 📃 Requirements
+# 📃 Requirements (User Stories)
 
-1. Player horizontal movement.
-2. Player shooting.
-3. Player collision detection + life system.
-4. Player respawn behavior.
-5. Enemy entry movement paths.
-6. Enemies lock into formation positions.
-7. Dive attacks from individual enemies.
-8. Bullet <-> Enemy collision detection.
-9. Enemy <-> Player collision.
-10. Score system and UI.
-11. Player lives UI.
-12. Wave progression system.
-13. High score persistence.
-14. Shoot/explosion sounds.
-15. Sprite rendering.
-16. Explosion animations.
-17. Tweened enemy entry movement.
-18. Player state machine.
-19. Enemy state machine.
-20. Bullet state machine.
-21. FormationController state machine.
+### **Player Actions**
+1. The player will be able to move horizontally.
+2. The player will be able to fire projectiles.
+3. The player will lose a life when hit by an enemy or projectile.
+4. The player will respawn with temporary invincibility after losing a life.
+5. The player will be able to collect powerups and gain temporary abilities.
+6. The player will be able to clear waves by defeating all enemies.
+
+### **Enemy & Formation Behavior**
+7. The system will spawn enemies that enter using predefined movement paths.
+8. The system will arrange enemies into formation positions.
+9. The system will trigger individual enemies to dive at the player.
+10. The system will allow enemies to be destroyed by player bullets.
+
+### **Powerups**
+11. The system spawns powerups at defined intervals or conditions.
+12. The system activates powerup effects immediately upon collection.
+13. Powerups influence gameplay, such as shooting speed or defense.
+
+### **Game Flow**
+14. The system will track and display the player’s score.
+15. The system will show the player's lives remaining.
+16. The system will progress to the next wave when enemies are cleared.
+17. The system will trigger a victory state when the final wave is cleared.
+18. The system will trigger a game over state when no lives remain.
+19. The system will save the player’s high score persistently.
+20. The system will play sound effects and background music during gameplay.
 
 ---
 
 # 🤖 State Diagrams
 
-## Global Game State Machine
+## **Global Game State Machine**
 
 ```mermaid
 stateDiagram-v2
@@ -73,7 +76,9 @@ stateDiagram-v2
     menu --> playing : start
     playing --> paused : pause
     paused --> playing : resume
-    playing --> game_over : lives depleted
+    playing --> victory : all waves cleared
+    playing --> game_over : lives = 0
+    victory --> menu : return
     game_over --> menu : restart
 ```
 
@@ -136,6 +141,20 @@ stateDiagram-v2
 
 ```
 
+## Power Up Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> falling
+    falling --> collected : player touches
+    falling --> expired : times out
+    collected --> applied
+    applied --> [*]
+    expired --> [*]
+
+```
+---
+
 ### 🗺️ Class Diagram
 
 ```mermaid
@@ -152,6 +171,7 @@ classDiagram
     class Player {
         +int lives
         +float speed
+        +applyPowerUp()
         +shoot()
     }
 
@@ -168,16 +188,22 @@ classDiagram
         +setState(stateName)
     }
 
-    class BeeEnemy {
-        +uniqueBehavior()
+    class BeeEnemy
+    class ButterflyEnemy
+    class BossEnemy
+
+    class PowerUp {
+        +apply(player)
+        +duration
     }
 
-    class ButterflyEnemy {
-        +uniqueBehavior()
-    }
+    class RapidFirePowerUp
+    class DoubleShotPowerUp
+    class SpreadShotPowerUp
+    class SpeedBoostPowerUp
 
-    class BossEnemy {
-        +uniqueBehavior()
+    class PowerUpFactory {
+        +createPowerUp(typeName, x, y)
     }
 
     class EnemyFactory {
@@ -186,32 +212,46 @@ classDiagram
     }
 
     class FormationController {
-        -list~Enemy~ enemies
+        -Enemy enemies*
         +addEnemy(enemy)
         +updateFormation(dt)
         +triggerDive(enemy)
         +isWaveCleared()
     }
 
+    %% Inheritance
     GameEntity <|-- Player
     GameEntity <|-- Bullet
     GameEntity <|-- Enemy
+    GameEntity <|-- PowerUp
 
     Enemy <|-- BeeEnemy
     Enemy <|-- ButterflyEnemy
     Enemy <|-- BossEnemy
 
-    FormationController --> Enemy : manages
-    EnemyFactory --> Enemy : creates
+    PowerUp <|-- RapidFirePowerUp
+    PowerUp <|-- DoubleShotPowerUp
+    PowerUp <|-- SpreadShotPowerUp
+    PowerUp <|-- SpeedBoostPowerUp
+
+    FormationController --> Enemy : manages 1..1 to 0..*
+    EnemyFactory --> Enemy : creates 1..1 to 1..1
+    PowerUpFactory --> PowerUp : creates 1..1 to 1..1
+    Player --> Bullet : fires 1..1 to 0..*
+
 ```
+--- 
 
 ### 🧵 Wireframes
+
+> [!NOTE]
+> Used AI to create wireframe
 
 ## Main Menu
 
 ![Main Menu](./assets/images/mainMenu.jpg)
 
-A retro arcade style main menu with the game title at the top and three pixel-style buttons (“Start Game”, “High Score”, “Quit”). The layout resembles a Galaga-era title screen with minimal UI and a dotted retro border.
+A retro arcade style main menu with the game title at the top and three pixel style buttons (“Start Game”, “High Score”, “Quit”). The layout resembles a Galaga era title screen with minimal UI and a dotted retro border.
 
 ## Game Play
 ![Game Play](./assets/images/gamePlay.jpg)
@@ -231,8 +271,9 @@ A centered retro pause overlay with a “PAUSED” title and two large pixel but
 ## Game Over Screen
 ![Game Over Screen](./assets/images/gameOver.jpg)
 
-A classic arcade-style “GAME OVER” screen with the final score displayed beneath it. A pixel-style “Return to Menu” button is centered at the bottom.
+A classic arcade style “GAME OVER” screen with the final score displayed beneath it. A pixel style “Return to Menu” button is centered at the bottom.
 
+---
 
 ### 🎨 Assets
 
@@ -241,6 +282,8 @@ We used a pixel-art inspired workflow to create the wireframes for Star Defender
 For visual direction, we are following trends already established in classic arcade shooters such as Galaga, Space Invaders, and other retro cabinet games that use bold colors, simple shapes, and clear silhouettes. These games rely on instantly recognizable enemy patterns, readable projectiles, and straightforward UI placement all elements we plan to follow.
 
 The overall GUI will remain clean and retro-themed, focusing on clarity over complexity. The goal is to make the game readable at all times: the player should instantly understand where the ship is, where the enemies are, and how many lives or points they have left. The visual design will lean into a nostalgic arcade feel, keeping the experience simple, fun, and authentic to the classic shooter style.
+
+---
 
 #### 🖼️ Images
 
@@ -253,6 +296,8 @@ Possible sources:
 
 Images will be mapped through src/config.json.
 
+---
+
 #### ✏️ Fonts
 
 The game will use retro-inspired fonts for both readability and visual style.
@@ -263,7 +308,9 @@ Planned fonts:
 
 Both fonts fit the classic shooter theme.
 
-#### 🔊 Sounds
+---
+
+### 🔊 Sounds
 Planned sound effects:
 * laser.wav –> player shooting
 * enemy_explosion.wav –> enemy destroyed
@@ -279,6 +326,8 @@ Sound sources may include:
 https://freesound.org/
 
 https://opengameart.org/
+
+---
 
 ### 📚 References
 
