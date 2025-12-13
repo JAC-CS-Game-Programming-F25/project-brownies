@@ -10,7 +10,7 @@ export default class TitleScreenState extends State {
 
 	enter() {
 		this.selectedOption = 0;
-		this.options = ['Start Game', 'High Score', 'Quit'];
+		this.options = ['Start Game', 'High Score'];
 	}
 
 	update(dt) {
@@ -28,52 +28,52 @@ export default class TitleScreenState extends State {
 	}
 
 	selectOption() {
-		switch (this.selectedOption) {
-			case 0: // Start Game
-				stateMachine.change(GameStateName.Play);
-				break;
-			case 1: // High Score
-				// TODO: Show high score
-				break;
-			case 2: // Quit
-				window.close();
-				break;
-		}
+	switch (this.selectedOption) {
+		case 0: // Start Game
+			stateMachine.change(GameStateName.Play, { score: 0, wave: 1 });
+			break;
+
+		case 1: // High Score
+			stateMachine.change(GameStateName.HighScore);
+			break;
 	}
+}
+
 
 	render() {
-		// Background
-		context.save();
-		context.fillStyle = '#000033';
-		context.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-		context.restore();
+	// Background
+	context.fillStyle = "black";
+	context.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-		// Title
-		context.save();
-		context.fillStyle = 'white';
-		context.font = 'bold 48px Arial';
-		context.textAlign = 'center';
-		context.fillText('STAR DEFENDERS', CANVAS_WIDTH / 2, 150);
-		context.restore();
-
-		// Menu options
-		context.save();
-		context.font = '24px Arial';
-		context.textAlign = 'center';
-
-		this.options.forEach((option, index) => {
-			const y = 250 + index * 60;
-			
-			if (index === this.selectedOption) {
-				// Draw selection box
-				context.strokeStyle = 'white';
-				context.lineWidth = 3;
-				context.strokeRect(CANVAS_WIDTH / 2 - 120, y - 30, 240, 50);
-			}
-
-			context.fillStyle = index === this.selectedOption ? '#00FF00' : 'white';
-			context.fillText(option, CANVAS_WIDTH / 2, y);
-		});
-		context.restore();
+	// Animated stars
+	context.fillStyle = "white";
+	for (let i = 0; i < 60; i++) {
+		const x = (i * 97) % CANVAS_WIDTH;
+		const y = (i * 53 + performance.now() * 0.03) % CANVAS_HEIGHT;
+		context.fillRect(x, y, 2, 2);
 	}
+
+	// Pulsing title
+	const pulse = Math.sin(performance.now() * 0.003) * 10;
+	context.fillStyle = "#00FFFF";
+	context.font = `bold ${64 + pulse}px Arial`;
+	context.textAlign = "center";
+	context.fillText("STAR DEFENDERS", CANVAS_WIDTH / 2, 160);
+
+	// Menu
+	context.font = "28px Arial";
+	this.options.forEach((option, index) => {
+		const y = 280 + index * 60;
+
+		if (index === this.selectedOption) {
+			context.strokeStyle = "#00FF00";
+			context.lineWidth = 4;
+			context.strokeRect(CANVAS_WIDTH / 2 - 160, y - 36, 320, 50);
+		}
+
+		context.fillStyle = index === this.selectedOption ? "#00FF00" : "white";
+		context.fillText(option, CANVAS_WIDTH / 2, y);
+	});
+}
+
 }

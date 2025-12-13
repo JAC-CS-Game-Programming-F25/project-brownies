@@ -3,62 +3,100 @@ import { CANVAS_WIDTH, CANVAS_HEIGHT, context, input, stateMachine } from "../gl
 import Input from "../../lib/Input.js";
 import GameStateName from "../enums/GameStateName.js";
 
-export default class GameOverState extends State {
-	constructor() {
-		super();
-	}
+const MAX_INITIALS = 3;
 
+export default class GameOverState extends State {
 	enter(parameters = {}) {
 		this.finalScore = parameters.score || 0;
+		this.initials = ["A", "A", "A"];
+		this.currentIndex = 0;
 	}
 
-	update(dt) {
-		if (input.isKeyPressed(Input.KEYS.ENTER) || input.isKeyPressed(Input.KEYS.SPACE)) {
-			stateMachine.change(GameStateName.TitleScreen);
+	update() {
+		// Change letter
+		if (input.isKeyPressed(Input.KEYS.ARROW_UP)) {
+			this.changeLetter(1);
+		}
+
+		if (input.isKeyPressed(Input.KEYS.ARROW_DOWN)) {
+			this.changeLetter(-1);
+		}
+
+		// Move cursor
+		if (input.isKeyPressed(Input.KEYS.ARROW_LEFT)) {
+			this.currentIndex = Math.max(0, this.currentIndex - 1);
+		}
+
+		if (input.isKeyPressed(Input.KEYS.ARROW_RIGHT)) {
+			this.currentIndex = Math.min(MAX_INITIALS - 1, this.currentIndex + 1);
+		}
+
+		// Confirm
+		if (input.isKeyPressed(Input.KEYS.ENTER)) {
+			this.saveHighScore();
+			stateMachine.change(GameStateName.HighScore);
 		}
 	}
 
+	changeLetter(direction) {
+		const code = this.initials[this.currentIndex].charCodeAt(0);
+		let next = code + direction;
+
+		if (next < 65) next = 90;
+		if (next > 90) next = 65;
+
+		this.initials[this.currentIndex] = String.fromCharCode(next);
+	}
+
+	saveHighScore() {
+		const entry = {
+			name: this.initials.join(""),
+			score: this.finalScore,
+		};
+
+		const key = "star-defenders-highscores";
+		const scores = JSON.parse(localStorage.getItem(key)) || [];
+
+		scores.push(entry);
+
+		// Sort descending and keep top 5
+		scores.sort((a, b) => b.score - a.score);
+		localStorage.setItem(key, JSON.stringify(scores.slice(0, 5)));
+	}
+
 	render() {
-		// Background
-		context.save();
-		context.fillStyle = '#000033';
+		context.fillStyle = "black";
 		context.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-		context.restore();
 
-		// Game Over text
-		context.save();
-		context.fillStyle = 'red';
-		context.font = 'bold 64px Arial';
-		context.textAlign = 'center';
-		context.fillText('GAME OVER', CANVAS_WIDTH / 2, 200);
-		context.restore();
+		context.fillStyle = "red";
+		context.font = "bold 64px Arial";
+		context.textAlign = "center";
+		context.fillText("GAME OVER", CANVAS_WIDTH / 2, 140);
 
-		// Final Score
-		context.save();
-		context.fillStyle = 'white';
-		context.font = '32px Arial';
-		context.textAlign = 'center';
-		context.fillText(`FINAL SCORE`, CANVAS_WIDTH / 2, 280);
-		context.fillText(`${this.finalScore}`, CANVAS_WIDTH / 2, 330);
-		context.restore();
+		context.fillStyle = "white";
+		context.font = "28px Arial";
+		context.fillText(`SCORE: ${this.finalScore}`, CANVAS_WIDTH / 2, 200);
 
-		// Return prompt
-		context.save();
-		context.strokeStyle = 'white';
-		context.lineWidth = 3;
-		context.strokeRect(CANVAS_WIDTH / 2 - 150, 380, 300, 60);
-		context.fillStyle = 'white';
-		context.font = '24px Arial';
-		context.textAlign = 'center';
-		context.fillText('Return to Menu', CANVAS_WIDTH / 2, 420);
-		context.restore();
+		context.fillText("ENTER YOUR INITIALS", CANVAS_WIDTH / 2, 260);
 
-		// Prompt
-		context.save();
-		context.fillStyle = '#888';
-		context.font = '16px Arial';
-		context.textAlign = 'center';
-		context.fillText('Press ENTER or SPACE', CANVAS_WIDTH / 2, 460);
-		context.restore();
-	}}
-	
+		// Initials
+		context.font = "48px Arial";
+		for (let i = 0; i < MAX_INITIALS; i++) {
+			const x = CANVAS_WIDTH / 2 - 60 + i * 60;
+			const y = 330;
+
+			if (i === this.currentIndex) {
+				context.strokeStyle = "#00FF00";
+				context.lineWidth = 3;
+				context.strokeRect(x - 25, y - 50, 50, 60);
+			}
+
+			context.fillStyle = "white";
+			context.fillText(this.initials[i], x, y);
+		}
+
+		context.font = "18px Arial";
+		context.fillStyle = "#AAAAAA";
+		context.fillText("UP/DOWN: Change  •  LEFT/RIGHT: Move  •  ENTER: Save", CANVAS_WIDTH / 2, 400);
+	}
+}
