@@ -2,7 +2,7 @@ import State from "../../lib/State.js";
 import Player from "../entities/Player.js";
 import EnemyFactory from "../services/EnemyFactory.js";
 import FormationController from "../services/FormationController.js";
-import { CANVAS_WIDTH, CANVAS_HEIGHT, context, input, stateMachine } from "../globals.js";
+import { CANVAS_WIDTH, CANVAS_HEIGHT, context, input, stateMachine, spriteManager } from "../globals.js";
 import Input from "../../lib/Input.js";
 import GameStateName from "../enums/GameStateName.js";
 
@@ -16,10 +16,10 @@ export default class PlayState extends State {
 		this.score = parameters.score ?? 0;
 		this.wave = parameters.wave ?? 1;
 
-		// Create player
+		// Create player (centered horizontally, near bottom of screen)
 		this.player = new Player(
-			CANVAS_WIDTH / 2 - 16,
-			CANVAS_HEIGHT - 60
+			CANVAS_WIDTH / 2 - Player.WIDTH / 2,
+			CANVAS_HEIGHT - Player.HEIGHT - 20
 		);
 
 		// Create enemies
@@ -59,6 +59,11 @@ export default class PlayState extends State {
 		if (input.isKeyPressed(Input.KEYS.V)) {
 			stateMachine.change(GameStateName.Victory);
 			return;
+		}
+
+		// Update sprite animations
+		if (spriteManager) {
+			spriteManager.update(dt);
 		}
 
 		// Update gameplay

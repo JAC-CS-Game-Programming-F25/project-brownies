@@ -1,5 +1,5 @@
 import GameEntity from "./GameEntity.js";
-import { CANVAS_HEIGHT } from "../globals.js";
+import { CANVAS_HEIGHT, spriteManager } from "../globals.js";
 
 export default class Bullet extends GameEntity {
 	/**
@@ -25,6 +25,7 @@ export default class Bullet extends GameEntity {
 	}
 
 	render() {
+		// Always use rectangle for bullets (no dedicated bullet sprite)
 		this.renderRectangle(this.color);
 	}
 

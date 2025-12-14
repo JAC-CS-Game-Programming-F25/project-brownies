@@ -1,9 +1,10 @@
 import GameEntity from "./GameEntity.js";
-import { CANVAS_WIDTH, CANVAS_HEIGHT } from "../globals.js";
+import { CANVAS_WIDTH, CANVAS_HEIGHT, spriteManager } from "../globals.js";
 
 export default class Enemy extends GameEntity {
-	static WIDTH = 28;
-	static HEIGHT = 28;
+	static WIDTH = 32;  // Sprite is 16x36, scaled 2x = 32x72
+	static HEIGHT = 72; // Match scaled sprite height
+	static SPRITE_SCALE = 2.0; // Scale sprites 2x
 
 	constructor(x, y, type, points = 100) {
 		super(x, y, Enemy.WIDTH, Enemy.HEIGHT);
@@ -17,9 +18,13 @@ export default class Enemy extends GameEntity {
 		this.attackPathIndex = 0;
 		this.movementSpeed = 150;
 		this.color = '#FF0000';
+		this.animationName = null; // Will be set by subclasses
 	}
 
 	update(dt) {
+		// Update sprite animations (SpriteManager handles this globally, but we can update here too if needed)
+		// The sprite animations are updated in PlayState, so we don't need to do it here
+
 		switch (this.state) {
 			case 'entering':
 				this.updateEntry(dt);
@@ -117,6 +122,22 @@ export default class Enemy extends GameEntity {
 	}
 
 	render() {
+		// Try to use sprite animation
+		if (spriteManager && this.animationName) {
+			// Try to render even if not fully loaded (sprites might load later)
+			if (spriteManager.isLoaded()) {
+				const rendered = spriteManager.drawAnimation(this.animationName,
+					Math.floor(this.position.x),
+					Math.floor(this.position.y),
+					Enemy.SPRITE_SCALE // Scale sprites 2x
+				);
+				if (rendered) {
+					return;
+				}
+			}
+		}
+		
+		// Fallback to rectangle
 		this.renderRectangle(this.color);
 	}
 

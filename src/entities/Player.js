@@ -1,13 +1,14 @@
 import GameEntity from "./GameEntity.js";
-import { CANVAS_WIDTH, CANVAS_HEIGHT, input } from "../globals.js";
+import { CANVAS_WIDTH, CANVAS_HEIGHT, input, spriteManager } from "../globals.js";
 import Input from "../../lib/Input.js";
 import Bullet from "./Bullet.js";
 
 export default class Player extends GameEntity {
-	static WIDTH = 32;
-	static HEIGHT = 32;
+	static WIDTH = 32;  // Sprite is 16x36, scaled 2x = 32x72
+	static HEIGHT = 72; // Match scaled sprite height
 	static SPEED = 250;
 	static SHOOT_COOLDOWN = 0.3;
+	static SPRITE_SCALE = 2.0; // Scale sprites 2x
 
 	constructor(x, y) {
 		super(x, y, Player.WIDTH, Player.HEIGHT);
@@ -78,7 +79,21 @@ export default class Player extends GameEntity {
 			return;
 		}
 
-		this.renderRectangle('#00FFFF'); // Cyan player ship
+		// Try to use sprite animation
+		if (spriteManager && spriteManager.isLoaded()) {
+			const rendered = spriteManager.drawAnimation('playerShip', 
+				Math.floor(this.position.x), 
+				Math.floor(this.position.y), 
+				Player.SPRITE_SCALE // Scale sprites 2x
+			);
+			if (rendered) {
+				this.bullets.forEach(bullet => bullet.render());
+				return;
+			}
+		}
+		
+		// Fallback to rectangle
+		this.renderRectangle('#00FFFF');
 		this.bullets.forEach(bullet => bullet.render());
 	}
 
@@ -95,7 +110,7 @@ export default class Player extends GameEntity {
 
 	respawn() {
 		this.position.x = CANVAS_WIDTH / 2 - this.dimensions.x / 2;
-		this.position.y = CANVAS_HEIGHT - 60;
+		this.position.y = CANVAS_HEIGHT - this.dimensions.y - 20;
 		this.isInvincible = true;
 		this.invincibilityTimer = 2.0;
 	}

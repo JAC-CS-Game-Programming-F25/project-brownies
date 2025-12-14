@@ -20,6 +20,7 @@ import {
 	timer,
 	sounds,
 	stateMachine,
+	spriteManager,
 } from './globals.js';
 import PlayState from './states/PlayState.js';
 import GameOverState from './states/GameOverState.js';

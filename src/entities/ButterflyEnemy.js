@@ -5,5 +5,6 @@ export default class ButterflyEnemy extends Enemy {
 	constructor(x, y) {
 		super(x, y, EnemyType.Butterfly, 150);
 		this.color = '#FF00FF'; // Magenta
+		this.animationName = 'enemyBlueFly'; // Use blue enemy animation
 	}
 }

@@ -1,6 +1,41 @@
 {
 	"images": [
-
+		{
+			"name": "sprite_ship",
+			"path": "./assets/images/sprite_ship.png",
+			"width": 64,
+			"height": 16
+		},
+		{
+			"name": "sprite_red",
+			"path": "./assets/images/sprite_red.png",
+			"width": 192,
+			"height": 16
+		},
+		{
+			"name": "sprite_green",
+			"path": "./assets/images/sprite_green.png",
+			"width": 192,
+			"height": 16
+		},
+		{
+			"name": "sprite_blue",
+			"path": "./assets/images/sprite_blue.png",
+			"width": 192,
+			"height": 16
+		},
+		{
+			"name": "sprite_purple",
+			"path": "./assets/images/sprite_purple.png",
+			"width": 64,
+			"height": 16
+		},
+		{
+			"name": "sprite_explosion",
+			"path": "./assets/images/sprite_explosion.png",
+			"width": 128,
+			"height": 16
+		}
 	],
 	"fonts": [
 

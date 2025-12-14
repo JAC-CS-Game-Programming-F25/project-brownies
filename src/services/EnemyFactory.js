@@ -55,9 +55,15 @@ export default class EnemyFactory {
 			enemies.push(enemy);
 		}
 
-		// Set entry paths for all enemies
+		// Set entry paths for all enemies and position them at the start
 		enemies.forEach((enemy, index) => {
-			enemy.setEntryPath(this.generateEntryPath(enemy, index));
+			const entryPath = this.generateEntryPath(enemy, index);
+			enemy.setEntryPath(entryPath);
+			// Position enemy at the start of the entry path
+			if (entryPath.length > 0) {
+				enemy.position.x = entryPath[0].x;
+				enemy.position.y = entryPath[0].y;
+			}
 		});
 
 		return enemies;

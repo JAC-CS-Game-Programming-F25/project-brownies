@@ -4,6 +4,7 @@ import Sounds from '../lib/Sounds.js';
 import StateMachine from '../lib/StateMachine.js';
 import Timer from '../lib/Timer.js';
 import Input from '../lib/Input.js';
+import SpriteManager from './services/SpriteManager.js';
 
 export const canvas = document.createElement('canvas');
 export const context =
@@ -34,3 +35,6 @@ export const stateMachine = new StateMachine();
 export const timer = new Timer();
 export const input = new Input(canvas);
 export const sounds = new Sounds();
+
+// Sprite manager - initialized with context
+export const spriteManager = new SpriteManager(context);
