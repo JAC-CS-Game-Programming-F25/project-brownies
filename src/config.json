@@ -35,6 +35,12 @@
 			"path": "./assets/images/sprite_explosion.png",
 			"width": 128,
 			"height": 16
+		},
+		{
+			"name": "sprite_enemyExplosion",
+			"path": "./assets/images/sprite_enemyExplosion.png",
+			"width": 128,
+			"height": 16
 		}
 	],
 	"fonts": [

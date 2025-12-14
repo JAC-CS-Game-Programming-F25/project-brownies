@@ -15,7 +15,8 @@ export default class SpriteManager {
 			blue: new SpriteSheet('./assets/images/sprite_blue.png', context),
 			green: new SpriteSheet('./assets/images/sprite_green.png', context),
 			purple: new SpriteSheet('./assets/images/sprite_purple.png', context),
-			explosion: new SpriteSheet('./assets/images/sprite_explosion.png', context)
+			explosion: new SpriteSheet('./assets/images/sprite_explosion.png', context),
+			enemyExplosion: new SpriteSheet('./assets/images/sprite_enemyExplosion.png', context)
 		};
 		
 		// Define all sprites with their coordinates
@@ -68,6 +69,12 @@ export default class SpriteManager {
 			explosion1: { sheet: 'explosion', sprite: this.sheets.explosion.getSprite(36, 0, 32, 52) },
 			explosion2: { sheet: 'explosion', sprite: this.sheets.explosion.getSprite(70, 0, 32, 52) },
 			explosion3: { sheet: 'explosion', sprite: this.sheets.explosion.getSprite(104, 0, 32, 52) },
+			
+			// ENEMY EXPLOSION (4 frames) - 32x52 each
+			enemyExplosion0: { sheet: 'enemyExplosion', sprite: this.sheets.enemyExplosion.getSprite(2, 0, 32, 52) },
+			enemyExplosion1: { sheet: 'enemyExplosion', sprite: this.sheets.enemyExplosion.getSprite(36, 0, 32, 52) },
+			enemyExplosion2: { sheet: 'enemyExplosion', sprite: this.sheets.enemyExplosion.getSprite(70, 0, 32, 52) },
+			enemyExplosion3: { sheet: 'enemyExplosion', sprite: this.sheets.enemyExplosion.getSprite(104, 0, 32, 52) },
 		};
 		
 		// Animation sequences
@@ -77,7 +84,8 @@ export default class SpriteManager {
 			enemyBlue: ['blue0', 'blue1', 'blue2', 'blue3', 'blue4', 'blue5', 'blue6', 'blue7'],
 			enemyPurple: ['purple0', 'purple1', 'purple2', 'purple3', 'purple4', 'purple5', 'purple6'],
 			enemyGreen: ['green0', 'green1', 'green2', 'green3'],
-			explode: ['explosion0', 'explosion1', 'explosion2', 'explosion3']
+			explode: ['explosion0', 'explosion1', 'explosion2', 'explosion3'],
+			enemyExplode: ['enemyExplosion0', 'enemyExplosion1', 'enemyExplosion2', 'enemyExplosion3']
 		};
 		
 		// Create Animation objects for each animation sequence
@@ -123,6 +131,13 @@ export default class SpriteManager {
 			1
 		);
 		
+		// Enemy explosion animation (4 frames, 0.1s per frame, play once)
+		this.animationObjects.enemyExplode = new Animation(
+			[0, 1, 2, 3],
+			0.1,
+			1
+		);
+		
 		// Map to old animation names for compatibility
 		this.animationObjects.enemyRedFly = this.animationObjects.enemyRed;
 		this.animationObjects.enemyBlueFly = this.animationObjects.enemyBlue;
@@ -140,7 +155,8 @@ export default class SpriteManager {
 			enemyYellowFly: 'enemyPurple',
 			enemyGreen: 'enemyGreen',
 			bossFly: 'enemyRed',
-			explode: 'explode'
+			explode: 'explode',
+			enemyExplode: 'enemyExplode'
 		};
 	}
 	

@@ -2,6 +2,7 @@ import GameEntity from "./GameEntity.js";
 import { CANVAS_WIDTH, CANVAS_HEIGHT, input, spriteManager } from "../globals.js";
 import Input from "../../lib/Input.js";
 import Bullet from "./Bullet.js";
+import Explosion from "./Explosion.js";
 
 export default class Player extends GameEntity {
 	static WIDTH = 32;  // Sprite is 16x36, scaled 2x = 32x72
@@ -79,9 +80,9 @@ export default class Player extends GameEntity {
 			return;
 		}
 
-		// Try to use sprite animation
+		// Try to use static sprite (first frame, no animation)
 		if (spriteManager && spriteManager.isLoaded()) {
-			const rendered = spriteManager.drawAnimation('playerShip', 
+			const rendered = spriteManager.draw('ship6', 
 				Math.floor(this.position.x), 
 				Math.floor(this.position.y), 
 				Player.SPRITE_SCALE // Scale sprites 2x
@@ -101,11 +102,19 @@ export default class Player extends GameEntity {
 		if (this.isInvincible) return;
 
 		this.lives--;
-		if (this.lives > 0) {
-			this.respawn();
-		} else {
+		// Don't respawn immediately - let PlayState handle explosion first
+		// PlayState will call respawn() after explosion finishes
+		if (this.lives <= 0) {
 			this.destroy();
 		}
+	}
+	
+	// Get position for explosion
+	getExplosionPosition() {
+		return {
+			x: this.position.x + this.dimensions.x / 2,
+			y: this.position.y + this.dimensions.y / 2
+		};
 	}
 
 	respawn() {

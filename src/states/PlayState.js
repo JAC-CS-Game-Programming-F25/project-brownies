@@ -2,6 +2,7 @@ import State from "../../lib/State.js";
 import Player from "../entities/Player.js";
 import EnemyFactory from "../services/EnemyFactory.js";
 import FormationController from "../services/FormationController.js";
+import Explosion from "../entities/Explosion.js";
 import { CANVAS_WIDTH, CANVAS_HEIGHT, context, input, stateMachine, spriteManager } from "../globals.js";
 import Input from "../../lib/Input.js";
 import GameStateName from "../enums/GameStateName.js";
@@ -28,6 +29,13 @@ export default class PlayState extends State {
 
 		// Pause flag
 		this.isPaused = false;
+		
+		// Explosions
+		this.explosions = [];
+		this.playerExplosion = null;
+		this.waitingForPlayerExplosion = false;
+		this.playerDied = false; // Track if player is completely dead
+		this.playerExplosionCreated = false; // Prevent recreation
 	}
 
 	update(dt) {
@@ -67,9 +75,34 @@ export default class PlayState extends State {
 		}
 
 		// Update gameplay
-		this.player.update(dt);
+		if (!this.waitingForPlayerExplosion) {
+			this.player.update(dt);
+		}
 		this.formationController.update(dt);
 		this.enemies.forEach(enemy => enemy.update(dt));
+		
+		// Update explosions
+		this.explosions.forEach(explosion => explosion.update(dt));
+		if (this.playerExplosion) {
+			this.playerExplosion.update(dt);
+			if (this.playerExplosion.isFinished() || this.playerExplosion.shouldCleanUp) {
+				// If player is dead, go to game over immediately
+				if (this.playerDied) {
+					this.playerExplosion = null;
+					this.waitingForPlayerExplosion = false;
+					stateMachine.change(GameStateName.GameOver, {
+						score: this.score
+					});
+					return; // Exit update - state is changing
+				}
+				// Otherwise, player lost a life but can continue - respawn and continue
+				this.playerExplosion = null;
+				this.waitingForPlayerExplosion = false;
+				if (this.player.getLives() > 0) {
+					this.player.respawn();
+				}
+			}
+		}
 
 		this.checkCollisions();
 		this.cleanupEntities();
@@ -87,11 +120,13 @@ export default class PlayState extends State {
 			}
 		}
 
-		// Game over
-		if (this.player.getLives() <= 0) {
-			stateMachine.change(GameStateName.GameOver, {
-				score: this.score
-			});
+		// Check if player died and create explosion (only once)
+		if (this.player.getLives() <= 0 && !this.playerExplosion && !this.waitingForPlayerExplosion && !this.playerExplosionCreated) {
+			const explosionPos = this.player.getExplosionPosition();
+			this.playerExplosion = new Explosion(explosionPos.x, explosionPos.y, 'player');
+			this.waitingForPlayerExplosion = true;
+			this.playerDied = true;
+			this.playerExplosionCreated = true; // Mark as created to prevent recreation
 		}
 	}
 
@@ -106,6 +141,14 @@ export default class PlayState extends State {
 				if (!enemy.isActive) return;
 
 				if (bullet.didCollideWithEntity(enemy)) {
+					// Create explosion at enemy position
+					const explosion = new Explosion(
+						enemy.position.x + enemy.dimensions.x / 2,
+						enemy.position.y + enemy.dimensions.y / 2,
+						'enemy'
+					);
+					this.explosions.push(explosion);
+					
 					bullet.onCollision(enemy);
 					enemy.onCollision(bullet);
 					this.score += enemy.getPoints();
@@ -114,13 +157,32 @@ export default class PlayState extends State {
 		});
 
 		// Player vs enemies
-		if (!this.player.isInvincible) {
+		if (!this.player.isInvincible && !this.waitingForPlayerExplosion) {
 			this.enemies.forEach(enemy => {
 				if (!enemy.isActive) return;
 
 				if (this.player.didCollideWithEntity(enemy)) {
+					// Create explosion at enemy position
+					const explosion = new Explosion(
+						enemy.position.x + enemy.dimensions.x / 2,
+						enemy.position.y + enemy.dimensions.y / 2,
+						'enemy'
+					);
+					this.explosions.push(explosion);
+					
 					enemy.destroy();
+					
+					// Check if player will lose a life
+					const livesBeforeHit = this.player.getLives();
 					this.player.hit();
+					const livesAfterHit = this.player.getLives();
+					
+					// If player lost a life (but not dead), create explosion
+					if (livesAfterHit < livesBeforeHit && livesAfterHit > 0 && !this.playerExplosion) {
+						const explosionPos = this.player.getExplosionPosition();
+						this.playerExplosion = new Explosion(explosionPos.x, explosionPos.y, 'player');
+						this.waitingForPlayerExplosion = true;
+					}
 				}
 			});
 		}
@@ -129,6 +191,7 @@ export default class PlayState extends State {
 	cleanupEntities() {
 		this.enemies = this.enemies.filter(enemy => !enemy.shouldCleanUp);
 		this.formationController.enemies = this.enemies;
+		this.explosions = this.explosions.filter(explosion => !explosion.shouldCleanUp);
 	}
 
 	nextWave() {
@@ -141,8 +204,20 @@ export default class PlayState extends State {
 
 	render() {
 		this.renderBackground();
-		this.player.render();
+		
+		// Render player if not waiting for explosion
+		if (!this.waitingForPlayerExplosion) {
+			this.player.render();
+		}
+		
 		this.enemies.forEach(enemy => enemy.render());
+		
+		// Render explosions
+		this.explosions.forEach(explosion => explosion.render());
+		if (this.playerExplosion) {
+			this.playerExplosion.render();
+		}
+		
 		this.renderHUD();
 
 		if (this.isPaused) {
