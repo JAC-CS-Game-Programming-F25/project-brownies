@@ -10,6 +10,13 @@ import GameStateName from "../enums/GameStateName.js";
 export default class PlayState extends State {
 	constructor() {
 		super();
+		this.backgroundImage = new Image();
+		this.backgroundImage.src = './assets/images/background.png';
+		this.backgroundLoaded = false;
+		
+		this.backgroundImage.onload = () => {
+			this.backgroundLoaded = true;
+		};
 	}
 
 	enter(parameters = {}) {
@@ -226,17 +233,35 @@ export default class PlayState extends State {
 	}
 
 	renderBackground() {
-		context.fillStyle = "black";
-		context.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+		// Background image
+		if (this.backgroundLoaded && this.backgroundImage.complete) {
+			context.drawImage(this.backgroundImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+		} else {
+			// Fallback black background while loading
+			context.fillStyle = "black";
+			context.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+		}
 	}
 
 	renderHUD() {
 		context.save();
 		context.fillStyle = "white";
-		context.font = "20px Arial";
-		context.fillText(`SCORE: ${this.score}`, 10, 30);
-		context.fillText(`LIVES: ${this.player.getLives()}`, CANVAS_WIDTH - 120, 30);
-		context.fillText(`WAVE: ${this.wave}`, CANVAS_WIDTH / 2 - 40, 30);
+		context.font = "bold 20px Orbitron";
+		context.textAlign = "center";
+		
+		// Center all HUD elements at the top
+		const hudY = 30;
+		const thirdWidth = CANVAS_WIDTH / 3;
+		
+		// SCORE: left third, centered
+		context.fillText(`SCORE: ${this.score}`, thirdWidth / 2, hudY);
+		
+		// WAVE: middle third, centered
+		context.fillText(`WAVE: ${this.wave}`, CANVAS_WIDTH / 2, hudY);
+		
+		// LIVES: right third, centered
+		context.fillText(`LIVES: ${this.player.getLives()}`, CANVAS_WIDTH - thirdWidth / 2, hudY);
+		
 		context.restore();
 	}
 
@@ -246,11 +271,11 @@ export default class PlayState extends State {
 		context.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
 		context.fillStyle = "#FFFF00";
-		context.font = "bold 48px Arial";
+		context.font = "900 48px Orbitron";
 		context.textAlign = "center";
 		context.fillText("PAUSED", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 80);
 
-		context.font = "24px Arial";
+		context.font = "bold 24px Orbitron";
 		context.fillStyle = "white";
 		context.fillText("P / ESC  —  Resume", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 10);
 		context.fillText("Q  —  Quit to Title", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 30);

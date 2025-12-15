@@ -6,6 +6,17 @@ import GameStateName from "../enums/GameStateName.js";
 const MAX_INITIALS = 3;
 
 export default class GameOverState extends State {
+	constructor() {
+		super();
+		this.backgroundImage = new Image();
+		this.backgroundImage.src = './assets/images/gameOverScreen.png';
+		this.backgroundLoaded = false;
+		
+		this.backgroundImage.onload = () => {
+			this.backgroundLoaded = true;
+		};
+	}
+
 	enter(parameters = {}) {
 		this.finalScore = parameters.score || 0;
 		this.initials = ["A", "A", "A"];
@@ -65,22 +76,26 @@ export default class GameOverState extends State {
 	}
 
 	render() {
-		context.fillStyle = "black";
-		context.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+		// Background image
+		if (this.backgroundLoaded && this.backgroundImage.complete) {
+			context.drawImage(this.backgroundImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+		} else {
+			// Fallback black background while loading
+			context.fillStyle = "black";
+			context.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+		}
 
-		context.fillStyle = "red";
-		context.font = "bold 64px Arial";
-		context.textAlign = "center";
-		context.fillText("GAME OVER", CANVAS_WIDTH / 2, 140);
-
+		// Score display
 		context.fillStyle = "white";
-		context.font = "28px Arial";
+		context.font = "bold 28px Orbitron";
+		context.textAlign = "center";
 		context.fillText(`SCORE: ${this.finalScore}`, CANVAS_WIDTH / 2, 200);
 
+		// Instructions
 		context.fillText("ENTER YOUR INITIALS", CANVAS_WIDTH / 2, 260);
 
-		// Initials
-		context.font = "48px Arial";
+		// Initials input
+		context.font = "900 48px Orbitron";
 		for (let i = 0; i < MAX_INITIALS; i++) {
 			const x = CANVAS_WIDTH / 2 - 60 + i * 60;
 			const y = 330;
@@ -95,7 +110,8 @@ export default class GameOverState extends State {
 			context.fillText(this.initials[i], x, y);
 		}
 
-		context.font = "18px Arial";
+		// Controls hint
+		context.font = "bold 18px Orbitron";
 		context.fillStyle = "#AAAAAA";
 		context.fillText("UP/DOWN: Change  •  LEFT/RIGHT: Move  •  ENTER: Save", CANVAS_WIDTH / 2, 400);
 	}
