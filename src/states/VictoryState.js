@@ -1,5 +1,5 @@
 import State from "../../lib/State.js";
-import { CANVAS_HEIGHT, CANVAS_WIDTH, context, input, stateMachine } from "../globals.js";
+import { CANVAS_HEIGHT, CANVAS_WIDTH, context, input, stateMachine, sounds } from "../globals.js";
 import Input from "../../lib/Input.js";
 import GameStateName from "../enums/GameStateName.js";
 
@@ -13,6 +13,13 @@ export default class VictoryState extends State {
 		this.backgroundImage.onload = () => {
 			this.backgroundLoaded = true;
 		};
+	}
+
+	enter() {
+		// Play victory sound when completing everything
+		if (sounds) {
+			sounds.play('finallySound');
+		}
 	}
 
 	update() {

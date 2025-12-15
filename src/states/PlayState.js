@@ -3,7 +3,7 @@ import Player from "../entities/Player.js";
 import EnemyFactory from "../services/EnemyFactory.js";
 import FormationController from "../services/FormationController.js";
 import Explosion from "../entities/Explosion.js";
-import { CANVAS_WIDTH, CANVAS_HEIGHT, context, input, stateMachine, spriteManager } from "../globals.js";
+import { CANVAS_WIDTH, CANVAS_HEIGHT, context, input, stateMachine, spriteManager, sounds } from "../globals.js";
 import Input from "../../lib/Input.js";
 import GameStateName from "../enums/GameStateName.js";
 
@@ -23,16 +23,30 @@ export default class PlayState extends State {
 		// Game data
 		this.score = parameters.score ?? 0;
 		this.wave = parameters.wave ?? 1;
+		this.previousScore = parameters.previousScore ?? this.score; // Track previous score for upgrade detection
+		const gunLevel = parameters.gunLevel ?? 1; // Persist gun level across waves
 
 		// Create player (centered horizontally, near bottom of screen)
 		this.player = new Player(
 			CANVAS_WIDTH / 2 - Player.WIDTH / 2,
 			CANVAS_HEIGHT - Player.HEIGHT - 20
 		);
+		
+		// Restore gun level if player had it upgraded
+		if (gunLevel >= 2) {
+			this.player.upgradeGun();
+		}
 
 		// Create enemies
 		this.enemies = EnemyFactory.createWave(this.wave);
-		this.formationController = new FormationController(this.enemies);
+		
+		// Set player reference and wave for all enemies
+		this.enemies.forEach(enemy => {
+			enemy.setPlayer(this.player);
+			enemy.setWave(this.wave);
+		});
+		
+		this.formationController = new FormationController(this.enemies, this.wave);
 
 		// Pause flag
 		this.isPaused = false;
@@ -43,6 +57,18 @@ export default class PlayState extends State {
 		this.waitingForPlayerExplosion = false;
 		this.playerDied = false; // Track if player is completely dead
 		this.playerExplosionCreated = false; // Prevent recreation
+		
+		// Gun upgrade system
+		this.gunUpgradeShown = parameters.gunUpgradeShown ?? false; // Track if we've shown the upgrade message (persist across waves)
+		this.gunUpgradeTimer = 0; // Timer for upgrade message display
+		this.showingGunUpgrade = false; // Flag for upgrade message display
+		
+		// Stop main menu sound when entering gameplay
+		if (sounds) {
+			sounds.stop('mainMenuSound');
+			// Play ingame sound when user is playing
+			sounds.play('ingameSound');
+		}
 	}
 
 	update(dt) {
@@ -56,22 +82,44 @@ export default class PlayState extends State {
 
 		// Quit to title while paused
 		if (this.isPaused && input.isKeyPressed(Input.KEYS.Q)) {
+			// Stop ingame sound when quitting to title
+			if (sounds) {
+				sounds.stop('ingameSound');
+			}
 			stateMachine.change(GameStateName.TitleScreen);
 			return;
 		}
 
+		// Handle gun upgrade pause/message
+		if (this.showingGunUpgrade) {
+			this.gunUpgradeTimer -= dt;
+			if (this.gunUpgradeTimer <= 0) {
+				this.showingGunUpgrade = false;
+			}
+			// Still render during upgrade message, but don't update gameplay
+			return;
+		}
+		
 		// STOP ALL GAME UPDATES WHILE PAUSED
 		if (this.isPaused) {
 			return;
 		}
 
 		if (input.isKeyPressed(Input.KEYS.Q)){
+			// Stop ingame sound when quitting to title
+			if (sounds) {
+				sounds.stop('ingameSound');
+			}
 			stateMachine.change(GameStateName.TitleScreen);
 			return;
 		}
 
 		// DEBUG: force victory
 		if (input.isKeyPressed(Input.KEYS.V)) {
+			// Stop ingame sound when victory
+			if (sounds) {
+				sounds.stop('ingameSound');
+			}
 			stateMachine.change(GameStateName.Victory);
 			return;
 		}
@@ -97,6 +145,10 @@ export default class PlayState extends State {
 				if (this.playerDied) {
 					this.playerExplosion = null;
 					this.waitingForPlayerExplosion = false;
+					// Stop ingame sound when game over
+					if (sounds) {
+						sounds.stop('ingameSound');
+					}
 					stateMachine.change(GameStateName.GameOver, {
 						score: this.score
 					});
@@ -112,16 +164,23 @@ export default class PlayState extends State {
 		}
 
 		this.checkCollisions();
+		this.checkGunUpgrade();
 		this.cleanupEntities();
 
 		// Wave cleared -> next wave
 		if (this.formationController.isWaveCleared()) {
 			if (this.wave >= 3) { // pick any final wave number
+				// Stop ingame sound when victory
+				if (sounds) {
+					sounds.stop('ingameSound');
+				}
 				stateMachine.change(GameStateName.Victory);
 			} else {
 				stateMachine.change(GameStateName.WaveComplete, {
 					wave: this.wave,
-					score: this.score
+					score: this.score,
+					gunLevel: this.player.getGunLevel(),
+					gunUpgradeShown: this.gunUpgradeShown
 				});
 				return;
 			}
@@ -163,6 +222,32 @@ export default class PlayState extends State {
 			});
 		});
 
+		// Enemy bullets vs player (Wave 2+)
+		if (this.wave >= 2 && !this.player.isInvincible && !this.waitingForPlayerExplosion) {
+			this.enemies.forEach(enemy => {
+				const enemyBullets = enemy.getBullets();
+				enemyBullets.forEach(bullet => {
+					if (!bullet.isActive) return;
+
+					if (bullet.didCollideWithEntity(this.player)) {
+						bullet.onCollision(this.player);
+						
+						// Check if player will lose a life
+						const livesBeforeHit = this.player.getLives();
+						this.player.hit();
+						const livesAfterHit = this.player.getLives();
+						
+						// If player lost a life (but not dead), create explosion
+						if (livesAfterHit < livesBeforeHit && livesAfterHit > 0 && !this.playerExplosion) {
+							const explosionPos = this.player.getExplosionPosition();
+							this.playerExplosion = new Explosion(explosionPos.x, explosionPos.y, 'player');
+							this.waitingForPlayerExplosion = true;
+						}
+					}
+				});
+			});
+		}
+
 		// Player vs enemies
 		if (!this.player.isInvincible && !this.waitingForPlayerExplosion) {
 			this.enemies.forEach(enemy => {
@@ -195,6 +280,24 @@ export default class PlayState extends State {
 		}
 	}
 
+	checkGunUpgrade() {
+		// Check if score reached 10000 and upgrade hasn't been shown yet
+		// Only check if score just crossed the threshold (was below, now above)
+		if (this.previousScore < 10000 && this.score >= 10000 && !this.gunUpgradeShown && this.player.getGunLevel() < 2) {
+			this.player.upgradeGun();
+			this.gunUpgradeShown = true;
+			this.showingGunUpgrade = true;
+			this.gunUpgradeTimer = 1.0; // Show message for 1 second
+			
+			// Play weapon unlock sound
+			if (sounds) {
+				sounds.play('weaponUnlockedSound');
+			}
+		}
+		// Update previous score for next frame
+		this.previousScore = this.score;
+	}
+	
 	cleanupEntities() {
 		this.enemies = this.enemies.filter(enemy => !enemy.shouldCleanUp);
 		this.formationController.enemies = this.enemies;
@@ -227,6 +330,10 @@ export default class PlayState extends State {
 		
 		this.renderHUD();
 
+		if (this.showingGunUpgrade) {
+			this.renderGunUpgrade();
+		}
+		
 		if (this.isPaused) {
 			this.renderPauseOverlay();
 		}
@@ -261,6 +368,22 @@ export default class PlayState extends State {
 		
 		// LIVES: right third, centered
 		context.fillText(`LIVES: ${this.player.getLives()}`, CANVAS_WIDTH - thirdWidth / 2, hudY);
+		
+		context.restore();
+	}
+	
+	renderGunUpgrade() {
+		context.save();
+		
+		// Semi-transparent overlay
+		context.fillStyle = "rgba(0,0,0,0.7)";
+		context.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+		
+		// "Weapon Level 2 Unlocked" text
+		context.fillStyle = "#00FF00";
+		context.font = "900 32px Orbitron";
+		context.textAlign = "center";
+		context.fillText("Weapon Level 2 Unlocked", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
 		
 		context.restore();
 	}

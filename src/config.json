@@ -83,6 +83,61 @@
 
 	],
 	"sounds": [
-		
+		{
+			"name": "mainMenuSound",
+			"path": "./assets/sounds/mainMenuSound.mp3",
+			"size": 1,
+			"volume": 0.5,
+			"loop": true
+		},
+		{
+			"name": "gunSound",
+			"path": "./assets/sounds/gunSound.mp3",
+			"size": 5,
+			"volume": 0.3,
+			"loop": false
+		},
+		{
+			"name": "finallySound",
+			"path": "./assets/sounds/finallySound.mp3",
+			"size": 1,
+			"volume": 0.5,
+			"loop": false
+		},
+		{
+			"name": "gameoverSound",
+			"path": "./assets/sounds/gameoverSound.mp3",
+			"size": 1,
+			"volume": 0.5,
+			"loop": false
+		},
+		{
+			"name": "ingameSound",
+			"path": "./assets/sounds/ingameSound.mp3",
+			"size": 1,
+			"volume": 0.5,
+			"loop": true
+		},
+		{
+			"name": "selectSound",
+			"path": "./assets/sounds/selectSound.mp3",
+			"size": 3,
+			"volume": 0.4,
+			"loop": false
+		},
+		{
+			"name": "waveCompletedSound",
+			"path": "./assets/sounds/waveCompletedSound.mp3",
+			"size": 1,
+			"volume": 0.5,
+			"loop": false
+		},
+		{
+			"name": "weaponUnlockedSound",
+			"path": "./assets/sounds/weaponUnlockedSound.mp3",
+			"size": 1,
+			"volume": 0.5,
+			"loop": false
+		}
 	]
 }

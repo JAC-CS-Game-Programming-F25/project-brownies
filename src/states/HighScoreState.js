@@ -1,5 +1,5 @@
 import State from "../../lib/State.js";
-import { CANVAS_WIDTH, CANVAS_HEIGHT, context, input, stateMachine } from "../globals.js";
+import { CANVAS_WIDTH, CANVAS_HEIGHT, context, input, stateMachine, sounds } from "../globals.js";
 import Input from "../../lib/Input.js";
 import GameStateName from "../enums/GameStateName.js";
 
@@ -23,10 +23,19 @@ export default class HighScoreState extends State {
 		while (this.scores.length < 5) {
 			this.scores.push({ name: "---", score: 0 });
 		}
+		
+		// Play main menu sound (score board is shown on main screen)
+		if (sounds) {
+			sounds.play('mainMenuSound');
+		}
 	}
 
 	update() {
 		if (input.isKeyPressed(Input.KEYS.ENTER) || input.isKeyPressed(Input.KEYS.ESCAPE)) {
+			// Stop main menu sound when leaving
+			if (sounds) {
+				sounds.stop('mainMenuSound');
+			}
 			stateMachine.change(GameStateName.TitleScreen);
 		}
 	}

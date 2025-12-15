@@ -1,5 +1,5 @@
 import State from "../../lib/State.js";
-import { CANVAS_WIDTH, CANVAS_HEIGHT, context, input, stateMachine } from "../globals.js";
+import { CANVAS_WIDTH, CANVAS_HEIGHT, context, input, stateMachine, sounds } from "../globals.js";
 import Input from "../../lib/Input.js";
 import GameStateName from "../enums/GameStateName.js";
 
@@ -21,25 +21,46 @@ export default class GameOverState extends State {
 		this.finalScore = parameters.score || 0;
 		this.initials = ["A", "A", "A"];
 		this.currentIndex = 0;
+		
+		// Play game over sound when player loses
+		if (sounds) {
+			sounds.play('gameoverSound');
+		}
 	}
 
 	update() {
 		// Change letter
 		if (input.isKeyPressed(Input.KEYS.ARROW_UP)) {
 			this.changeLetter(1);
+			// Play select sound when selecting/changing
+			if (sounds) {
+				sounds.play('selectSound');
+			}
 		}
 
 		if (input.isKeyPressed(Input.KEYS.ARROW_DOWN)) {
 			this.changeLetter(-1);
+			// Play select sound when selecting/changing
+			if (sounds) {
+				sounds.play('selectSound');
+			}
 		}
 
 		// Move cursor
 		if (input.isKeyPressed(Input.KEYS.ARROW_LEFT)) {
 			this.currentIndex = Math.max(0, this.currentIndex - 1);
+			// Play select sound when selecting/changing
+			if (sounds) {
+				sounds.play('selectSound');
+			}
 		}
 
 		if (input.isKeyPressed(Input.KEYS.ARROW_RIGHT)) {
 			this.currentIndex = Math.min(MAX_INITIALS - 1, this.currentIndex + 1);
+			// Play select sound when selecting/changing
+			if (sounds) {
+				sounds.play('selectSound');
+			}
 		}
 
 		// Confirm

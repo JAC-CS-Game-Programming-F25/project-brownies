@@ -1,5 +1,5 @@
 import State from "../../lib/State.js";
-import { CANVAS_WIDTH, CANVAS_HEIGHT, context, input, stateMachine } from "../globals.js";
+import { CANVAS_WIDTH, CANVAS_HEIGHT, context, input, stateMachine, sounds } from "../globals.js";
 import Input from "../../lib/Input.js";
 import GameStateName from "../enums/GameStateName.js";
 
@@ -15,9 +15,17 @@ export default class WaveCompleteState extends State {
 		};
 	}
 
+
 	enter(parameters = {}) {
 		this.wave = parameters.wave ?? 1;
 		this.score = parameters.score ?? 0;
+		this.gunLevel = parameters.gunLevel ?? 1;
+		this.gunUpgradeShown = parameters.gunUpgradeShown ?? false;
+		
+		// Play wave completed sound
+		if (sounds) {
+			sounds.play('waveCompletedSound');
+		}
 	}
 
 	update() {
@@ -25,7 +33,10 @@ export default class WaveCompleteState extends State {
 		if (input.isKeyPressed(Input.KEYS.ENTER)) {
 			stateMachine.change(GameStateName.Play, {
 				wave: this.wave + 1,
-				score: this.score
+				score: this.score,
+				gunLevel: this.gunLevel,
+				gunUpgradeShown: this.gunUpgradeShown,
+				previousScore: this.score
 			});
 		}
 	}

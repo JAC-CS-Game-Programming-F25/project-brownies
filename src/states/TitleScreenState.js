@@ -1,5 +1,5 @@
 import State from "../../lib/State.js";
-import { CANVAS_WIDTH, CANVAS_HEIGHT, context, input, stateMachine } from "../globals.js";
+import { CANVAS_WIDTH, CANVAS_HEIGHT, context, input, stateMachine, sounds } from "../globals.js";
 import Input from "../../lib/Input.js";
 import GameStateName from "../enums/GameStateName.js";
 
@@ -18,15 +18,27 @@ export default class TitleScreenState extends State {
 	enter() {
 		this.selectedOption = 0;
 		this.options = ['Start Game', 'High Score'];
+		// Play main menu sound
+		if (sounds) {
+			sounds.play('mainMenuSound');
+		}
 	}
 
 	update(dt) {
 		if (input.isKeyPressed(Input.KEYS.ARROW_UP) || input.isKeyPressed(Input.KEYS.W)) {
 			this.selectedOption = Math.max(0, this.selectedOption - 1);
+			// Play select sound when selecting options
+			if (sounds) {
+				sounds.play('selectSound');
+			}
 		}
 
 		if (input.isKeyPressed(Input.KEYS.ARROW_DOWN) || input.isKeyPressed(Input.KEYS.S)) {
 			this.selectedOption = Math.min(this.options.length - 1, this.selectedOption + 1);
+			// Play select sound when selecting options
+			if (sounds) {
+				sounds.play('selectSound');
+			}
 		}
 
 		if (input.isKeyPressed(Input.KEYS.ENTER)) {
@@ -35,16 +47,21 @@ export default class TitleScreenState extends State {
 	}
 
 	selectOption() {
-	switch (this.selectedOption) {
-		case 0: // Start Game
-			stateMachine.change(GameStateName.Play, { score: 0, wave: 1 });
-			break;
+		// Stop main menu sound when leaving
+		if (sounds) {
+			sounds.stop('mainMenuSound');
+		}
+		
+		switch (this.selectedOption) {
+			case 0: // Start Game
+				stateMachine.change(GameStateName.Play, { score: 0, wave: 1 });
+				break;
 
-		case 1: // High Score
-			stateMachine.change(GameStateName.HighScore);
-			break;
+			case 1: // High Score
+				stateMachine.change(GameStateName.HighScore);
+				break;
+		}
 	}
-}
 
 
 	render() {

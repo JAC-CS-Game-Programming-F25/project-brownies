@@ -1,8 +1,9 @@
 import GameEntity from "./GameEntity.js";
-import { CANVAS_WIDTH, CANVAS_HEIGHT, input, spriteManager } from "../globals.js";
+import { CANVAS_WIDTH, CANVAS_HEIGHT, input, spriteManager, sounds } from "../globals.js";
 import Input from "../../lib/Input.js";
 import Bullet from "./Bullet.js";
 import Explosion from "./Explosion.js";
+import { isAABBCollision } from "../../lib/Collision.js";
 
 export default class Player extends GameEntity {
 	static WIDTH = 32;  // Sprite width
@@ -19,6 +20,7 @@ export default class Player extends GameEntity {
 		this.isInvincible = false;
 		this.invincibilityTimer = 0;
 		this.bullets = [];
+		this.gunLevel = 1; // Starts at level 1, can upgrade to 2
 	}
 
 	update(dt) {
@@ -54,10 +56,34 @@ export default class Player extends GameEntity {
 	}
 
 	shoot() {
-		const bulletX = this.position.x + this.dimensions.x / 2 - 2;
+		const centerX = this.position.x + this.dimensions.x / 2 - 2;
 		const bulletY = this.position.y;
-		this.bullets.push(new Bullet(bulletX, bulletY, true));
+		
+		if (this.gunLevel >= 2) {
+			// 2-way shot: shoot diagonal left and right
+			this.bullets.push(new Bullet(centerX - 8, bulletY, true, -1)); // Left diagonal
+			this.bullets.push(new Bullet(centerX + 8, bulletY, true, 1));  // Right diagonal
+		} else {
+			// Level 1: single shot straight up
+			this.bullets.push(new Bullet(centerX, bulletY, true, 0));
+		}
+		
+		// Play gunshot sound
+		if (sounds) {
+			sounds.play('gunSound');
+		}
+		
 		this.shootCooldown = Player.SHOOT_COOLDOWN;
+	}
+	
+	upgradeGun() {
+		if (this.gunLevel < 2) {
+			this.gunLevel = 2;
+		}
+	}
+	
+	getGunLevel() {
+		return this.gunLevel;
 	}
 
 	updateBullets(dt) {
@@ -137,5 +163,37 @@ export default class Player extends GameEntity {
 
 	getBullets() {
 		return this.bullets;
+	}
+	
+	didCollideWithEntity(entity) {
+		// Use AABB collision with tighter hitbox for player
+		// Reduce the hitbox from the front (top) to match sprite better
+		const frontHitboxPadding = 20; // Padding to reduce front hitbox
+		
+		// Create tighter AABB hitbox for player (reduced from top)
+		const playerHitboxX = this.position.x;
+		const playerHitboxY = this.position.y + frontHitboxPadding;
+		const playerHitboxWidth = this.dimensions.x;
+		const playerHitboxHeight = this.dimensions.y - frontHitboxPadding;
+		
+		// If entity is Enemy, use its tighter hitbox too
+		if (entity.didCollideWithEntity && entity.constructor.name === 'Enemy') {
+			const enemyHitboxPadding = 8;
+			const enemyHitboxX = entity.position.x + enemyHitboxPadding;
+			const enemyHitboxY = entity.position.y + enemyHitboxPadding;
+			const enemyHitboxWidth = entity.dimensions.x - (enemyHitboxPadding * 2);
+			const enemyHitboxHeight = entity.dimensions.y - (enemyHitboxPadding * 2);
+			
+			return isAABBCollision(
+				playerHitboxX, playerHitboxY, playerHitboxWidth, playerHitboxHeight,
+				enemyHitboxX, enemyHitboxY, enemyHitboxWidth, enemyHitboxHeight
+			);
+		}
+		
+		// For other entities, use standard AABB collision
+		return isAABBCollision(
+			playerHitboxX, playerHitboxY, playerHitboxWidth, playerHitboxHeight,
+			entity.position.x, entity.position.y, entity.dimensions.x, entity.dimensions.y
+		);
 	}
 }
