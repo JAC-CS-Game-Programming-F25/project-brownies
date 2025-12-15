@@ -5,8 +5,8 @@ import Bullet from "./Bullet.js";
 import Explosion from "./Explosion.js";
 
 export default class Player extends GameEntity {
-	static WIDTH = 32;  // Sprite is 16x36, scaled 2x = 32x72
-	static HEIGHT = 72; // Match scaled sprite height
+	static WIDTH = 32;  // Sprite width
+	static HEIGHT = 72; // Keep same height for positioning (sprite may be different size but position stays same)
 	static SPEED = 250;
 	static SHOOT_COOLDOWN = 0.3;
 	static SPRITE_SCALE = 2.0; // Scale sprites 2x
@@ -80,11 +80,18 @@ export default class Player extends GameEntity {
 			return;
 		}
 
-		// Try to use static sprite (first frame, no animation)
+		// Try to use main ship sprite
 		if (spriteManager && spriteManager.isLoaded()) {
-			const rendered = spriteManager.draw('ship6', 
+			// Offset sprite downward to align with explosion position
+			// The explosion appears at position.y + dimensions.y/2 (center of logical position)
+			// We offset the sprite so its visual center aligns with that point
+			// Adjust this offset value if needed to fine-tune alignment
+			const spriteYOffset = 36; // Adjust this value to align sprite with explosion
+			const spriteY = this.position.y + spriteYOffset;
+			
+			const rendered = spriteManager.draw('mainShip', 
 				Math.floor(this.position.x), 
-				Math.floor(this.position.y), 
+				Math.floor(spriteY), 
 				Player.SPRITE_SCALE // Scale sprites 2x
 			);
 			if (rendered) {

@@ -1,20 +1,26 @@
 import EnemyType from "../enums/EnemyType.js";
-import BeeEnemy from "../entities/BeeEnemy.js";
-import ButterflyEnemy from "../entities/ButterflyEnemy.js";
-import BossEnemy from "../entities/BossEnemy.js";
+import GreyAlienEnemy from "../entities/GreyAlienEnemy.js";
+import PurpleAlienEnemy from "../entities/PurpleAlienEnemy.js";
+import YellowAlienEnemy from "../entities/YellowAlienEnemy.js";
+import BlueBumbleEnemy from "../entities/BlueBumbleEnemy.js";
+import RedBumbleEnemy from "../entities/RedBumbleEnemy.js";
 import { CANVAS_WIDTH } from "../globals.js";
 
 export default class EnemyFactory {
 	static createEnemy(type, x, y) {
 		switch (type) {
-			case EnemyType.Bee:
-				return new BeeEnemy(x, y);
-			case EnemyType.Butterfly:
-				return new ButterflyEnemy(x, y);
-			case EnemyType.Boss:
-				return new BossEnemy(x, y);
+			case EnemyType.GreyAlien:
+				return new GreyAlienEnemy(x, y);
+			case EnemyType.PurpleAlien:
+				return new PurpleAlienEnemy(x, y);
+			case EnemyType.YellowAlien:
+				return new YellowAlienEnemy(x, y);
+			case EnemyType.BlueBumble:
+				return new BlueBumbleEnemy(x, y);
+			case EnemyType.RedBumble:
+				return new RedBumbleEnemy(x, y);
 			default:
-				return new BeeEnemy(x, y);
+				return new GreyAlienEnemy(x, y);
 		}
 	}
 
@@ -26,31 +32,31 @@ export default class EnemyFactory {
 		const startX = (CANVAS_WIDTH - (cols * spacing)) / 2;
 		const startY = 80;
 
-		// Boss row
+		// Red Bumble row (top row)
 		for (let col = 0; col < cols; col++) {
 			const x = startX + col * spacing;
 			const y = startY;
-			const enemy = this.createEnemy(EnemyType.Boss, x, y);
+			const enemy = this.createEnemy(EnemyType.RedBumble, x, y);
 			enemy.formationPosition = { x, y };
 			enemies.push(enemy);
 		}
 
-		// Butterfly rows
+		// Purple Alien rows (middle two rows)
 		for (let row = 0; row < 2; row++) {
 			for (let col = 0; col < cols; col++) {
 				const x = startX + col * spacing;
 				const y = startY + (row + 1) * spacing;
-				const enemy = this.createEnemy(EnemyType.Butterfly, x, y);
+				const enemy = this.createEnemy(EnemyType.PurpleAlien, x, y);
 				enemy.formationPosition = { x, y };
 				enemies.push(enemy);
 			}
 		}
 
-		// Bee row
+		// Yellow Alien row (bottom row)
 		for (let col = 0; col < cols; col++) {
 			const x = startX + col * spacing;
 			const y = startY + 3 * spacing;
-			const enemy = this.createEnemy(EnemyType.Bee, x, y);
+			const enemy = this.createEnemy(EnemyType.YellowAlien, x, y);
 			enemy.formationPosition = { x, y };
 			enemies.push(enemy);
 		}

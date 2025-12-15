@@ -41,6 +41,42 @@
 			"path": "./assets/images/sprite_enemyExplosion.png",
 			"width": 128,
 			"height": 16
+		},
+		{
+			"name": "sprite_blueNEW",
+			"path": "./assets/images/sprite_blueNEW.png",
+			"width": 46,
+			"height": 48
+		},
+		{
+			"name": "sprite_redNEW",
+			"path": "./assets/images/sprite_redNEW.png",
+			"width": 46,
+			"height": 48
+		},
+		{
+			"name": "sprite_enemyGreyDown",
+			"path": "./assets/images/sprite_enemyGreyDown.png",
+			"width": 192,
+			"height": 16
+		},
+		{
+			"name": "sprite_enemyPurpleDown",
+			"path": "./assets/images/sprite_enemyPurpleDown.png",
+			"width": 192,
+			"height": 16
+		},
+		{
+			"name": "sprite_enemyYellowDown",
+			"path": "./assets/images/sprite_enemyYellowDown.png",
+			"width": 192,
+			"height": 16
+		},
+		{
+			"name": "sprite_mainShip",
+			"path": "./assets/images/sprite_mainShip.png",
+			"width": 32,
+			"height": 32
 		}
 	],
 	"fonts": [

@@ -1,7 +1,9 @@
 const EnemyType = {
-	Bee: 'bee',
-	Butterfly: 'butterfly',
-	Boss: 'boss',
+	GreyAlien: 'greyAlien',
+	PurpleAlien: 'purpleAlien',
+	YellowAlien: 'yellowAlien',
+	BlueBumble: 'blueBumble',
+	RedBumble: 'redBumble',
 };
 
 export default EnemyType;

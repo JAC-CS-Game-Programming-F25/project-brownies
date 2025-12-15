@@ -2,8 +2,8 @@ import GameEntity from "./GameEntity.js";
 import { CANVAS_WIDTH, CANVAS_HEIGHT, spriteManager } from "../globals.js";
 
 export default class Enemy extends GameEntity {
-	static WIDTH = 32;  // Sprite is 16x36, scaled 2x = 32x72
-	static HEIGHT = 72; // Match scaled sprite height
+	static WIDTH = 32;  // Sprite width (will vary per frame, but using max width scaled)
+	static HEIGHT = 96; // Sprite is 48px height, scaled 2x = 96px (updated for NEW sprites)
 	static SPRITE_SCALE = 2.0; // Scale sprites 2x
 
 	constructor(x, y, type, points = 100) {
@@ -19,6 +19,9 @@ export default class Enemy extends GameEntity {
 		this.movementSpeed = 150;
 		this.color = '#FF0000';
 		this.animationName = null; // Will be set by subclasses
+		this.entryAnimationName = null; // For down enemies: entry animation
+		this.idleAnimationName = null; // For down enemies: idle animation
+		this.entryAnimationComplete = false; // Track if entry animation finished
 	}
 
 	update(dt) {
@@ -43,12 +46,28 @@ export default class Enemy extends GameEntity {
 	}
 
 	updateEntry(dt) {
+		// Check if entry animation is complete (for down enemies with entry/idle animations)
+		if (this.entryAnimationName && spriteManager) {
+			const entryAnim = spriteManager.getAnimationObject(this.entryAnimationName);
+			if (entryAnim && entryAnim.isDone() && !this.entryAnimationComplete) {
+				this.entryAnimationComplete = true;
+				// Switch to idle animation
+				if (this.idleAnimationName) {
+					const idleAnim = spriteManager.getAnimationObject(this.idleAnimationName);
+					if (idleAnim) {
+						idleAnim.refresh(); // Reset idle animation
+					}
+				}
+			}
+		}
+		
 		if (this.entryPath.length === 0 || this.entryPathIndex >= this.entryPath.length) {
 			this.state = 'in-formation';
 			this.position.x = this.formationPosition.x;
 			this.position.y = this.formationPosition.y;
 			this.velocity.x = 0;
 			this.velocity.y = 0;
+			this.entryAnimationComplete = true; // Entry path complete = entry animation complete
 			return;
 		}
 
@@ -122,11 +141,23 @@ export default class Enemy extends GameEntity {
 	}
 
 	render() {
+		// Determine which animation to use (entry/idle for down enemies, or regular animation)
+		let animToUse = this.animationName;
+		
+		// For down enemies: use entry animation until complete, then switch to idle
+		if (this.entryAnimationName && this.idleAnimationName) {
+			if (this.entryAnimationComplete || this.state === 'in-formation') {
+				animToUse = this.idleAnimationName;
+			} else {
+				animToUse = this.entryAnimationName;
+			}
+		}
+		
 		// Try to use sprite animation
-		if (spriteManager && this.animationName) {
+		if (spriteManager && animToUse) {
 			// Try to render even if not fully loaded (sprites might load later)
 			if (spriteManager.isLoaded()) {
-				const rendered = spriteManager.drawAnimation(this.animationName,
+				const rendered = spriteManager.drawAnimation(animToUse,
 					Math.floor(this.position.x),
 					Math.floor(this.position.y),
 					Enemy.SPRITE_SCALE // Scale sprites 2x
