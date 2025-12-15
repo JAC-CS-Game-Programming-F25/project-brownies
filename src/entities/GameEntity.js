@@ -1,13 +1,29 @@
 import Vector from "../../lib/Vector.js";
 import { context } from "../globals.js";
 
+/**
+ * GameEntity - Base class for all game objects
+ * 
+ * This is the foundation class that all game entities inherit from. It provides
+ * common functionality like position, velocity, dimensions, collision detection,
+ * and basic rendering. All game objects (Player, Enemy, Bullet, Explosion, etc.)
+ * extend this class to get these shared capabilities.
+ * 
+ * Key features:
+ * - Position and velocity management using Vector objects
+ * - Collision detection (AABB - Axis-Aligned Bounding Box)
+ * - Screen bounds checking
+ * - Lifecycle management (active state, cleanup flag)
+ * - Basic rendering fallback (colored rectangle)
+ */
 export default class GameEntity {
 	/**
-	 * Base class for all game entities (Player, Enemy, Bullet, PowerUp)
-	 * @param {number} x 
-	 * @param {number} y 
-	 * @param {number} width 
-	 * @param {number} height 
+	 * Creates a new game entity
+	 * 
+	 * @param {number} x - Initial X position
+	 * @param {number} y - Initial Y position
+	 * @param {number} width - Entity width for collision detection
+	 * @param {number} height - Entity height for collision detection
 	 */
 	constructor(x = 0, y = 0, width = 16, height = 16) {
 		this.position = new Vector(x, y);

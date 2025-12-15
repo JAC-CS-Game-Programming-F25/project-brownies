@@ -41,12 +41,12 @@ export default class VictoryState extends State {
 
 		// Mission Completed text - smaller and higher
 		context.fillStyle = "#00FF00";
-		context.font = "900 48px Orbitron";
+		context.font = "900 48px Orbitron"; // Victory title uses Orbitron
 		context.textAlign = "center";
 		context.fillText("Mission Completed", CANVAS_WIDTH / 2, 120);
 
 		// Message - higher with side margins
-		context.font = "bold 20px Orbitron";
+		context.font = "bold 20px Orbitron"; // Victory message uses Orbitron
 		context.fillStyle = "white";
 		const margin = 60; // Side margins
 		const maxWidth = CANVAS_WIDTH - (margin * 2);

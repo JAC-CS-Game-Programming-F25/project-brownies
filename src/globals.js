@@ -1,3 +1,19 @@
+/**
+ * Globals - Shared game resources and utilities
+ * 
+ * This module exports all globally accessible game resources that need to be
+ * shared across multiple game states and entities. This includes:
+ * - Canvas and rendering context
+ * - Asset managers (Images, Fonts, Sounds)
+ * - Game state machine
+ * - Input handler
+ * - Timer for delta time calculation
+ * - Sprite manager for sprite rendering
+ * - Game constants (canvas dimensions)
+ * 
+ * These are initialized in main.js and available throughout the game codebase.
+ */
+
 import Fonts from '../lib/Fonts.js';
 import Images from '../lib/Images.js';
 import Sounds from '../lib/Sounds.js';

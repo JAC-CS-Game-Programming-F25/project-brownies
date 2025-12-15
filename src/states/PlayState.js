@@ -3,10 +3,35 @@ import Player from "../entities/Player.js";
 import EnemyFactory from "../services/EnemyFactory.js";
 import FormationController from "../services/FormationController.js";
 import Explosion from "../entities/Explosion.js";
+import ScorePopup from "../entities/ScorePopup.js";
 import { CANVAS_WIDTH, CANVAS_HEIGHT, context, input, stateMachine, spriteManager, sounds } from "../globals.js";
 import Input from "../../lib/Input.js";
 import GameStateName from "../enums/GameStateName.js";
 
+/**
+ * PlayState - Main gameplay state
+ * 
+ * This is the core gameplay state where all the action happens. It manages:
+ * 
+ * Game Entities:
+ * - Player ship (movement, shooting, lives, gun upgrades)
+ * - Enemy waves (formation movement, attacking, shooting)
+ * - Bullets (both player and enemy)
+ * - Explosions (visual feedback for destruction)
+ * - Score popups (floating text when enemies are destroyed)
+ * 
+ * Game Systems:
+ * - Collision detection (player-enemy, player-bullet, bullet-enemy)
+ * - Score tracking and gun upgrade system (upgrades at 10000 points)
+ * - Screen shake effects (brutal shake when player takes damage)
+ * - Wave progression (3 waves total, each with different difficulty)
+ * - Sound management (ingame music, gun sounds, explosion sounds)
+ * 
+ * State Transitions:
+ * - WaveComplete: When all enemies in a wave are defeated
+ * - GameOver: When player runs out of lives
+ * - Victory: When player completes all 3 waves
+ */
 export default class PlayState extends State {
 	constructor() {
 		super();
@@ -57,6 +82,13 @@ export default class PlayState extends State {
 		this.waitingForPlayerExplosion = false;
 		this.playerDied = false; // Track if player is completely dead
 		this.playerExplosionCreated = false; // Prevent recreation
+		
+		// Score popups and screen shake
+		this.scorePopups = [];
+		this.screenShakeX = 0;
+		this.screenShakeY = 0;
+		this.screenShakeTimer = 0;
+		this.screenShakeIntensity = 0;
 		
 		// Gun upgrade system
 		this.gunUpgradeShown = parameters.gunUpgradeShown ?? false; // Track if we've shown the upgrade message (persist across waves)
@@ -138,6 +170,25 @@ export default class PlayState extends State {
 		
 		// Update explosions
 		this.explosions.forEach(explosion => explosion.update(dt));
+		
+		// Update score popups
+		this.scorePopups.forEach(popup => popup.update(dt));
+		this.scorePopups = this.scorePopups.filter(popup => !popup.shouldCleanUp);
+		
+		// Update screen shake (brutal intensity)
+		if (this.screenShakeTimer > 0) {
+			this.screenShakeTimer -= dt;
+			const shakeDuration = 0.4; // Match the duration set in triggerScreenShake
+			const progress = this.screenShakeTimer / shakeDuration;
+			// Use a more aggressive shake curve for brutal effect
+			const intensityMultiplier = Math.pow(progress, 0.7); // Slower decay for more sustained shake
+			this.screenShakeX = (Math.random() - 0.5) * this.screenShakeIntensity * intensityMultiplier;
+			this.screenShakeY = (Math.random() - 0.5) * this.screenShakeIntensity * intensityMultiplier;
+		} else {
+			this.screenShakeX = 0;
+			this.screenShakeY = 0;
+		}
+		
 		if (this.playerExplosion) {
 			this.playerExplosion.update(dt);
 			if (this.playerExplosion.isFinished() || this.playerExplosion.shouldCleanUp) {
@@ -193,9 +244,25 @@ export default class PlayState extends State {
 			this.waitingForPlayerExplosion = true;
 			this.playerDied = true;
 			this.playerExplosionCreated = true; // Mark as created to prevent recreation
+			// Play player explosion sound when player dies
+			if (sounds) {
+				sounds.play('playerExplosionSound');
+			}
 		}
 	}
 
+	/**
+	 * Checks for collisions between all game entities
+	 * 
+	 * This method handles three types of collisions:
+	 * 1. Player bullets vs Enemies: Destroys enemies, awards points, creates explosions and score popups
+	 * 2. Enemy bullets vs Player: Reduces player lives, creates explosion, triggers screen shake
+	 * 3. Player vs Enemies: Direct collision also reduces lives
+	 * 
+	 * When the player is hit, the game creates an explosion, triggers screen shake,
+	 * and plays a sound effect. If the player has remaining lives, they respawn
+	 * after the explosion completes (handled in update method).
+	 */
 	checkCollisions() {
 		const playerBullets = this.player.getBullets();
 
@@ -207,17 +274,21 @@ export default class PlayState extends State {
 				if (!enemy.isActive) return;
 
 				if (bullet.didCollideWithEntity(enemy)) {
+					const enemyCenterX = enemy.position.x + enemy.dimensions.x / 2;
+					const enemyCenterY = enemy.position.y + enemy.dimensions.y / 2;
+					
 					// Create explosion at enemy position
-					const explosion = new Explosion(
-						enemy.position.x + enemy.dimensions.x / 2,
-						enemy.position.y + enemy.dimensions.y / 2,
-						'enemy'
-					);
+					const explosion = new Explosion(enemyCenterX, enemyCenterY, 'enemy');
 					this.explosions.push(explosion);
+					
+					// Create score popup
+					const points = enemy.getPoints();
+					const scorePopup = new ScorePopup(enemyCenterX, enemyCenterY, points);
+					this.scorePopups.push(scorePopup);
 					
 					bullet.onCollision(enemy);
 					enemy.onCollision(bullet);
-					this.score += enemy.getPoints();
+					this.score += points;
 				}
 			});
 		});
@@ -237,12 +308,18 @@ export default class PlayState extends State {
 						this.player.hit();
 						const livesAfterHit = this.player.getLives();
 						
-						// If player lost a life (but not dead), create explosion
-						if (livesAfterHit < livesBeforeHit && livesAfterHit > 0 && !this.playerExplosion) {
-							const explosionPos = this.player.getExplosionPosition();
-							this.playerExplosion = new Explosion(explosionPos.x, explosionPos.y, 'player');
-							this.waitingForPlayerExplosion = true;
+					// If player lost a life (but not dead), create explosion
+					if (livesAfterHit < livesBeforeHit && livesAfterHit > 0 && !this.playerExplosion) {
+						const explosionPos = this.player.getExplosionPosition();
+						this.playerExplosion = new Explosion(explosionPos.x, explosionPos.y, 'player');
+						this.waitingForPlayerExplosion = true;
+						// Trigger screen shake (brutal intensity)
+						this.triggerScreenShake(25);
+						// Play player explosion sound when player loses a life
+						if (sounds) {
+							sounds.play('playerExplosionSound');
 						}
+					}
 					}
 				});
 			});
@@ -274,15 +351,48 @@ export default class PlayState extends State {
 						const explosionPos = this.player.getExplosionPosition();
 						this.playerExplosion = new Explosion(explosionPos.x, explosionPos.y, 'player');
 						this.waitingForPlayerExplosion = true;
+						// Trigger screen shake (brutal intensity)
+						this.triggerScreenShake(25);
+						// Play player explosion sound when player loses a life
+						if (sounds) {
+							sounds.play('playerExplosionSound');
+						}
 					}
 				}
 			});
 		}
 	}
 
+	/**
+	 * Triggers a screen shake effect with the specified intensity
+	 * 
+	 * Screen shake provides visual feedback when the player takes damage,
+	 * making hits feel more impactful. The shake lasts 0.4 seconds and uses
+	 * a power curve for smooth decay (brutal intensity).
+	 * 
+	 * @param {number} intensity - Maximum shake distance in pixels (currently 25 for brutal effect)
+	 */
+	triggerScreenShake(intensity) {
+		this.screenShakeIntensity = intensity;
+		this.screenShakeTimer = 0.4; // 0.4 seconds of shake (longer for more impact)
+	}
+	
+	/**
+	 * Checks if the player's gun should be upgraded
+	 * 
+	 * The gun upgrades from level 1 (single shot) to level 2 (two-way diagonal shot)
+	 * when the player reaches 10000 points. This only happens once per game,
+	 * and the upgrade persists across waves.
+	 * 
+	 * When upgraded:
+	 * - Player gun level increases to 2
+	 * - Message "Weapon Level 2 Unlocked" is displayed for 1 second
+	 * - Weapon unlock sound plays
+	 * - Game briefly pauses for visual emphasis
+	 */
 	checkGunUpgrade() {
-		// Check if score reached 10000 and upgrade hasn't been shown yet
-		// Only check if score just crossed the threshold (was below, now above)
+		// Check if score just crossed the 10000 threshold (was below, now above)
+		// Only upgrade once (gunUpgradeShown flag) and if not already upgraded
 		if (this.previousScore < 10000 && this.score >= 10000 && !this.gunUpgradeShown && this.player.getGunLevel() < 2) {
 			this.player.upgradeGun();
 			this.gunUpgradeShown = true;
@@ -302,6 +412,7 @@ export default class PlayState extends State {
 		this.enemies = this.enemies.filter(enemy => !enemy.shouldCleanUp);
 		this.formationController.enemies = this.enemies;
 		this.explosions = this.explosions.filter(explosion => !explosion.shouldCleanUp);
+		this.scorePopups = this.scorePopups.filter(popup => !popup.shouldCleanUp);
 	}
 
 	nextWave() {
@@ -313,6 +424,10 @@ export default class PlayState extends State {
 	}
 
 	render() {
+		// Apply screen shake offset
+		context.save();
+		context.translate(this.screenShakeX, this.screenShakeY);
+		
 		this.renderBackground();
 		
 		// Render player if not waiting for explosion
@@ -328,6 +443,12 @@ export default class PlayState extends State {
 			this.playerExplosion.render();
 		}
 		
+		// Render score popups
+		this.scorePopups.forEach(popup => popup.render());
+		
+		context.restore(); // End screen shake transform
+		
+		// HUD and overlays rendered without shake
 		this.renderHUD();
 
 		if (this.showingGunUpgrade) {
@@ -353,7 +474,7 @@ export default class PlayState extends State {
 	renderHUD() {
 		context.save();
 		context.fillStyle = "white";
-		context.font = "bold 20px Orbitron";
+		context.font = "bold 20px 'Roboto Mono', monospace"; // Different font for HUD
 		context.textAlign = "center";
 		
 		// Center all HUD elements at the top

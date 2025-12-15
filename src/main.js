@@ -1,11 +1,19 @@
 /**
- * Game Name
- *
- * Authors
- *
- * Brief description
- *
- * Asset sources
+ * Main Entry Point - Space Shooter Game
+ * 
+ * This is the entry point for the game. It handles:
+ * - Canvas setup and initialization
+ * - Asset loading (images, fonts, sounds) from config.json
+ * - State machine setup and initialization
+ * - Game loop start
+ * 
+ * The game uses a state machine pattern to manage different game screens:
+ * - TitleScreen: Main menu
+ * - Play: Active gameplay
+ * - WaveComplete: Transition between waves
+ * - GameOver: Game over screen with high score entry
+ * - HighScore: High score display
+ * - Victory: Victory screen after completing all waves
  */
 
 import GameStateName from './enums/GameStateName.js';

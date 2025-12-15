@@ -5,6 +5,23 @@ import Bullet from "./Bullet.js";
 import Explosion from "./Explosion.js";
 import { isAABBCollision } from "../../lib/Collision.js";
 
+/**
+ * Player - The player's ship entity
+ * 
+ * This class manages all player-related functionality including:
+ * - Movement (left/right using arrow keys or WASD)
+ * - Shooting (spacebar or up arrow)
+ * - Gun upgrade system (starts at level 1, upgrades to level 2 at 10000 points)
+ *   - Level 1: Single shot straight up
+ *   - Level 2: Two-way diagonal shot
+ * - Lives system (starts with 3 lives)
+ * - Invincibility frames after taking damage (2 seconds of blinking)
+ * - Collision detection with tighter hitbox (reduced front padding for better feel)
+ * 
+ * The player sprite is drawn using the mainShip sprite from SpriteManager,
+ * which is scaled 2x for better visibility. The logical position (for collisions)
+ * and visual position (for sprite rendering) are offset to align properly.
+ */
 export default class Player extends GameEntity {
 	static WIDTH = 32;  // Sprite width
 	static HEIGHT = 72; // Keep same height for positioning (sprite may be different size but position stays same)

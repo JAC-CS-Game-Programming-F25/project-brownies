@@ -3,6 +3,30 @@ import { CANVAS_WIDTH, CANVAS_HEIGHT, spriteManager } from "../globals.js";
 import Bullet from "./Bullet.js";
 import { isAABBCollision } from "../../lib/Collision.js";
 
+/**
+ * Enemy - Base class for all enemy types
+ * 
+ * This class implements the core enemy behavior that all enemy types share:
+ * 
+ * State Machine:
+ * - 'entering': Enemy moves from spawn point to formation position (plays entry animation)
+ * - 'in-formation': Enemy follows formation movement pattern (plays idle animation if available)
+ * - 'attacking': Enemy breaks formation and attacks the player
+ * 
+ * Wave-Based Behavior:
+ * - Wave 1: Enemies dive at player but commit to fixed trajectory (no tracking)
+ * - Wave 2: Enemies dive with fixed trajectory AND can shoot bullets while attacking
+ * - Wave 3: Enemies continuously track player position while attacking, shoot more frequently
+ * 
+ * Animation System:
+ * - Some enemies (Grey/Purple/Yellow Aliens) have entry + idle animations
+ * - Entry animation plays once when enemy first appears
+ * - Idle animation loops continuously after entry completes
+ * - Other enemies (Blue/Red Bumbles) have simple looping animations
+ * 
+ * Subclasses (GreyAlienEnemy, PurpleAlienEnemy, etc.) set their specific
+ * animation names and point values, while sharing this base behavior.
+ */
 export default class Enemy extends GameEntity {
 	static WIDTH = 32;  // Sprite width (will vary per frame, but using max width scaled)
 	static HEIGHT = 96; // Sprite is 48px height, scaled 2x = 96px (updated for NEW sprites)

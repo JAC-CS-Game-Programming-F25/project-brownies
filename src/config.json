@@ -1,46 +1,16 @@
 {
 	"images": [
 		{
-			"name": "sprite_ship",
-			"path": "./assets/images/sprite_ship.png",
-			"width": 64,
-			"height": 16
-		},
-		{
-			"name": "sprite_red",
-			"path": "./assets/images/sprite_red.png",
-			"width": 192,
-			"height": 16
-		},
-		{
-			"name": "sprite_green",
-			"path": "./assets/images/sprite_green.png",
-			"width": 192,
-			"height": 16
-		},
-		{
-			"name": "sprite_blue",
-			"path": "./assets/images/sprite_blue.png",
-			"width": 192,
-			"height": 16
-		},
-		{
-			"name": "sprite_purple",
-			"path": "./assets/images/sprite_purple.png",
-			"width": 64,
-			"height": 16
-		},
-		{
-			"name": "sprite_explosion",
-			"path": "./assets/images/sprite_explosion.png",
-			"width": 128,
-			"height": 16
+			"name": "sprite_mainShip",
+			"path": "./assets/images/sprite_mainShip.png",
+			"width": 32,
+			"height": 32
 		},
 		{
 			"name": "sprite_enemyExplosion",
 			"path": "./assets/images/sprite_enemyExplosion.png",
-			"width": 128,
-			"height": 16
+			"width": 960,
+			"height": 384
 		},
 		{
 			"name": "sprite_blueNEW",
@@ -71,12 +41,6 @@
 			"path": "./assets/images/sprite_enemyYellowDown.png",
 			"width": 192,
 			"height": 16
-		},
-		{
-			"name": "sprite_mainShip",
-			"path": "./assets/images/sprite_mainShip.png",
-			"width": 32,
-			"height": 32
 		}
 	],
 	"fonts": [
@@ -135,6 +99,13 @@
 		{
 			"name": "weaponUnlockedSound",
 			"path": "./assets/sounds/weaponUnlockedSound.mp3",
+			"size": 1,
+			"volume": 0.5,
+			"loop": false
+		},
+		{
+			"name": "playerExplosionSound",
+			"path": "./assets/sounds/playerExplosionSound.mp3",
 			"size": 1,
 			"volume": 0.5,
 			"loop": false

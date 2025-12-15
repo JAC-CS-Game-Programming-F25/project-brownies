@@ -75,7 +75,7 @@ export default class TitleScreenState extends State {
 		}
 
 		// Menu options with selection indicator
-		context.font = "bold 28px Orbitron";
+		context.font = "bold 28px Orbitron"; // Title screen uses Orbitron
 		context.textAlign = "center";
 		
 		this.options.forEach((option, index) => {

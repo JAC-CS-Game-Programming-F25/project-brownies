@@ -6,7 +6,36 @@ import BlueBumbleEnemy from "../entities/BlueBumbleEnemy.js";
 import RedBumbleEnemy from "../entities/RedBumbleEnemy.js";
 import { CANVAS_WIDTH } from "../globals.js";
 
+/**
+ * EnemyFactory - Factory class for creating enemies and waves
+ * 
+ * This class uses the Factory pattern to create enemy instances and manage
+ * wave generation. It centralizes all enemy creation logic, making it easy
+ * to modify enemy compositions and formations across waves.
+ * 
+ * Key responsibilities:
+ * - Creating individual enemy instances based on type
+ * - Generating wave formations (different layouts for each wave)
+ * - Setting up enemy entry paths (how enemies appear on screen)
+ * 
+ * Wave Design:
+ * - Wave 1: Standard grid formation, mixed enemy types, no shooting
+ * - Wave 2: Different formation layout, enemies can shoot while attacking
+ * - Wave 3+: V-shaped formation, enemies shoot more frequently and track player more aggressively
+ */
 export default class EnemyFactory {
+	/**
+	 * Creates a single enemy instance of the specified type
+	 * 
+	 * This method uses the Factory pattern to instantiate the correct
+	 * enemy subclass based on the type enum. Each enemy type has its
+	 * own class with specific animations and point values.
+	 * 
+	 * @param {EnemyType} type - The type of enemy to create
+	 * @param {number} x - Initial X position
+	 * @param {number} y - Initial Y position
+	 * @returns {Enemy} The created enemy instance
+	 */
 	static createEnemy(type, x, y) {
 		switch (type) {
 			case EnemyType.GreyAlien:
@@ -20,13 +49,31 @@ export default class EnemyFactory {
 			case EnemyType.RedBumble:
 				return new RedBumbleEnemy(x, y);
 			default:
+				// Default to GreyAlien if unknown type (shouldn't happen, but safe fallback)
 				return new GreyAlienEnemy(x, y);
 		}
 	}
 
+	/**
+	 * Creates a complete wave of enemies with formation and entry paths
+	 * 
+	 * This is the main method for wave generation. It:
+	 * 1. Creates enemies in the appropriate formation layout for the wave
+	 * 2. Generates entry paths for each enemy (how they appear on screen)
+	 * 3. Positions enemies at the start of their entry paths
+	 * 
+	 * Wave progression:
+	 * - Wave 1: Standard grid (5 rows × 6 columns)
+	 * - Wave 2: Modified grid with different spacing
+	 * - Wave 3+: V-shaped formation for more challenging gameplay
+	 * 
+	 * @param {number} waveNumber - The wave number (1, 2, 3+)
+	 * @returns {Enemy[]} Array of enemy instances ready to enter the screen
+	 */
 	static createWave(waveNumber) {
 		let enemies = [];
 		
+		// Choose formation based on wave number
 		if (waveNumber === 1) {
 			enemies = this.createWave1Formation();
 		} else if (waveNumber === 2) {
@@ -35,11 +82,12 @@ export default class EnemyFactory {
 			enemies = this.createWave3Formation();
 		}
 
-		// Set entry paths for all enemies and position them at the start
+		// Set up entry paths for all enemies so they fly in from off-screen
+		// Each enemy gets a unique entry path that positions them at their formation spot
 		enemies.forEach((enemy, index) => {
 			const entryPath = this.generateEntryPath(enemy, index);
 			enemy.setEntryPath(entryPath);
-			// Position enemy at the start of the entry path
+			// Position enemy at the start of their entry path (off-screen)
 			if (entryPath.length > 0) {
 				enemy.position.x = entryPath[0].x;
 				enemy.position.y = entryPath[0].y;

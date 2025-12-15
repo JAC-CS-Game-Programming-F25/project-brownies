@@ -108,7 +108,7 @@ export default class GameOverState extends State {
 
 		// Score display
 		context.fillStyle = "white";
-		context.font = "bold 28px Orbitron";
+		context.font = "bold 28px Orbitron"; // Game over screen uses Orbitron
 		context.textAlign = "center";
 		context.fillText(`SCORE: ${this.finalScore}`, CANVAS_WIDTH / 2, 200);
 
@@ -116,7 +116,7 @@ export default class GameOverState extends State {
 		context.fillText("ENTER YOUR INITIALS", CANVAS_WIDTH / 2, 260);
 
 		// Initials input
-		context.font = "900 48px Orbitron";
+		context.font = "900 48px Orbitron"; // Large Orbitron for initials
 		for (let i = 0; i < MAX_INITIALS; i++) {
 			const x = CANVAS_WIDTH / 2 - 60 + i * 60;
 			const y = 330;
